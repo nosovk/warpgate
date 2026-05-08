@@ -24,7 +24,7 @@
     import Loadable from 'common/Loadable.svelte'
     import EmptyState from 'common/EmptyState.svelte'
     import Tooltip from 'common/sveltestrap-s5-ports/Tooltip.svelte'
-    import { adminPermissions } from 'admin/lib/store'
+    import { adminPermissions } from 'admin/lib/store.svelte'
 
     interface Props {
         userId: string
@@ -293,7 +293,7 @@
 <div class="d-flex align-items-center mt-4 mb-2">
     <h4 class="m-0">Credentials</h4>
     <span class="ms-auto"></span>
-    {#if $adminPermissions.usersEdit}
+    {#if adminPermissions.value.usersEdit}
     <Button size="sm" color="link" on:click={() => creatingPassword = true}>
         Add password
     </Button>
@@ -374,7 +374,7 @@
             <Button
                 class="px-0"
                 color="link"
-                disabled={credential.kind === CredentialKind.PublicKey && (ldapLinked || !$adminPermissions.usersEdit)}
+                disabled={credential.kind === CredentialKind.PublicKey && (ldapLinked || !adminPermissions.value.usersEdit)}
                 onclick={e => {
                     if (credential.kind === CredentialKind.Sso) {
                         editingSsoCredentialInstance = credential
@@ -392,7 +392,7 @@
             <Button
                 class="px-0"
                 color="link"
-                disabled={credential.kind === CredentialKind.PublicKey && (ldapLinked || !$adminPermissions.usersEdit)}
+                disabled={credential.kind === CredentialKind.PublicKey && (ldapLinked || !adminPermissions.value.usersEdit)}
                 onclick={e => {
                     deleteCredential(credential)
                     e.preventDefault()

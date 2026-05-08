@@ -1,6 +1,6 @@
 <script lang="ts">
     import { api, type Role, type User, type UserRoleAssignmentResponse, type AdminRole } from 'admin/lib/api'
-    import { serverInfo } from 'gateway/lib/store'
+    import { serverInfo } from 'gateway/lib/store.svelte'
     import AsyncButton from 'common/AsyncButton.svelte'
     import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle, FormGroup, Input, Button, Modal, ModalBody, ModalFooter } from '@sveltestrap/sveltestrap'
     import ModalHeader from 'common/sveltestrap-s5-ports/ModalHeader.svelte'
@@ -15,7 +15,7 @@
     import { faCaretDown, faLink, faUnlink, faWrench } from '@fortawesome/free-solid-svg-icons'
     import RelativeDate from '../../RelativeDate.svelte'
     import { onMount, onDestroy } from 'svelte'
-    import { adminPermissions } from 'admin/lib/store'
+    import { adminPermissions } from 'admin/lib/store.svelte'
     import AdminRolePermissionsBadge from '../AdminRolePermissionsBadge.svelte'
     import Tooltip from 'common/sveltestrap-s5-ports/Tooltip.svelte'
     import { formatDistanceToNow } from 'date-fns'
@@ -281,7 +281,7 @@
                 <Input bind:value={user.username} disabled={!user.ldapServerId} />
             </FormGroup>
 
-            {#if $serverInfo?.hasLdap}
+            {#if serverInfo.value?.hasLdap}
             <Dropdown class="mb-3">
                 <DropdownToggle color={user.ldapServerId ? 'info' : 'secondary'} class="d-flex align-items-center gap-2">
                     {#if user.ldapServerId}
@@ -311,7 +311,7 @@
             <Input bind:value={user.description} />
         </FormGroup>
 
-        {#if $adminPermissions.usersEdit}
+        {#if adminPermissions.value.usersEdit}
         <CredentialEditor
             userId={user.id}
             username={user.username}
@@ -396,7 +396,7 @@
                         class="mb-0 me-2"
                         type="switch"
                         on:change={() => toggleAdminRole(role)}
-                        disabled={!$adminPermissions.adminRolesManage}
+                        disabled={!adminPermissions.value.adminRolesManage}
                         checked={adminRoleIsAllowed[role.id]} />
                     <div>
                         <div>{role.name}</div>
@@ -440,14 +440,14 @@
             color="primary"
             class="ms-auto"
             click={update}
-            disabled={!$adminPermissions.usersEdit}
+            disabled={!adminPermissions.value.usersEdit}
         >Update</AsyncButton>
 
         <AsyncButton
             class="ms-2"
             color="danger"
             click={remove}
-            disabled={!$adminPermissions.usersDelete}
+            disabled={!adminPermissions.value.usersDelete}
         >Remove</AsyncButton>
     </div>
 </div>

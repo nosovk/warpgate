@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { AdminRole } from 'admin/lib/api'
-    import { ADMIN_PERMISSIONS } from '../lib/store'
+    import { ADMIN_PERMISSIONS } from '../lib/store.svelte'
     import Tooltip from 'common/sveltestrap-s5-ports/Tooltip.svelte'
 
     export let role: AdminRole

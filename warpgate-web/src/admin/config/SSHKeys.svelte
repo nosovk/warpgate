@@ -4,7 +4,7 @@
     import CopyButton from 'common/CopyButton.svelte'
     import { stringifyError } from 'common/errors'
     import { Button } from '@sveltestrap/sveltestrap'
-    import { adminPermissions } from 'admin/lib/store'
+    import { adminPermissions } from 'admin/lib/store.svelte'
 
     let error: string|undefined = $state()
     let knownHosts: SSHKnownHost[]|undefined = $state()
@@ -12,7 +12,7 @@
 
     async function load () {
         ownKeys = await api.getSshOwnKeys()
-        if ($adminPermissions.configEdit) {
+        if (adminPermissions.value.configEdit) {
             knownHosts = await api.getSshKnownHosts()
         }
     }
@@ -73,7 +73,7 @@
                             e.preventDefault()
                             deleteHost(host)
                         }}
-                        disabled={!$adminPermissions.configEdit}
+                        disabled={!adminPermissions.value.configEdit}
                     >Delete</Button>
                 </div>
                 <pre>{host.keyType} {host.keyBase64}</pre>

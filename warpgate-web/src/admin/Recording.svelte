@@ -14,11 +14,11 @@
     let { params = { id: '' } }: Props = $props()
 
     let error: string|null = $state(null)
-    import { adminPermissions } from './lib/store'
+    import { adminPermissions } from './lib/store.svelte'
     let recording: Recording|null = $state(null)
 
     async function load () {
-        if (!$adminPermissions.recordingsView) {
+        if (!adminPermissions.value.recordingsView) {
             error = 'You do not have permission to view recordings.'
             return
         }

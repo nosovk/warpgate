@@ -1,7 +1,7 @@
 <script lang="ts">
     import { FormGroup, Input } from '@sveltestrap/sveltestrap'
     import { push } from 'svelte-spa-router'
-    import { reloadServerInfo } from 'gateway/lib/store'
+    import { reloadServerInfo } from 'gateway/lib/store.svelte'
     import { api, LdapUsernameAttribute, stringifyError, TlsMode, type Tls } from 'admin/lib/api'
     import AsyncButton from 'common/AsyncButton.svelte'
     import Alert from 'common/sveltestrap-s5-ports/Alert.svelte'

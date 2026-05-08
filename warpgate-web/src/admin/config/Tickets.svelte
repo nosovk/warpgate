@@ -8,7 +8,7 @@
     import Alert from 'common/sveltestrap-s5-ports/Alert.svelte'
     import EmptyState from 'common/EmptyState.svelte'
     import { Button } from '@sveltestrap/sveltestrap'
-    import { adminPermissions } from 'admin/lib/store'
+    import { adminPermissions } from 'admin/lib/store.svelte'
 
     let error: string|undefined = $state()
     let tickets: Ticket[]|undefined = $state()
@@ -42,7 +42,7 @@
             <a
                 class="btn btn-primary ms-auto"
                 href="/config/tickets/create"
-                class:disabled={!$adminPermissions.ticketsCreate}
+                class:disabled={!adminPermissions.value.ticketsCreate}
                 use:link>
                 Create a ticket
             </a>
@@ -88,7 +88,7 @@
                                 deleteTicket(ticket)
                                 e.preventDefault()
                             }}
-                            disabled={!$adminPermissions.ticketsDelete}
+                            disabled={!adminPermissions.value.ticketsDelete}
                         >Delete</Button>
                     </div>
                 {/each}

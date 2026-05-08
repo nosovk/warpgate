@@ -6,7 +6,7 @@
     import Alert from 'common/sveltestrap-s5-ports/Alert.svelte'
     import { onMount } from 'svelte'
     import { TargetKind } from 'gateway/lib/api'
-    import { adminPermissions } from '../../lib/store'
+    import { adminPermissions } from '../../lib/store.svelte'
 
     interface Props {
         params: { kind: string }
@@ -107,7 +107,7 @@
 </script>
 
 <div class="container-max-md">
-    {#if !$adminPermissions.targetsCreate}
+    {#if !adminPermissions.value.targetsCreate}
         <Alert color="warning">You do not have permission to create targets.</Alert>
     {/if}
     {#if error}

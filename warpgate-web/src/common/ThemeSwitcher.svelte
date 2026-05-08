@@ -1,38 +1,37 @@
 <script lang="ts">
-    import Fa from 'svelte-fa'
-    import { faCloudSun, faMoon, faSun } from '@fortawesome/free-solid-svg-icons'
-    import { Button } from '@sveltestrap/sveltestrap'
-    import { get } from 'svelte/store'
+  import Fa from 'svelte-fa'
+  import { faCloudSun, faMoon, faSun } from '@fortawesome/free-solid-svg-icons'
+  import { Button } from '@sveltestrap/sveltestrap'
 
-    import { currentTheme, setCurrentTheme } from 'theme'
-    import Tooltip from './sveltestrap-s5-ports/Tooltip.svelte'
+  import { theme, setCurrentTheme } from 'theme/index.svelte'
+  import Tooltip from './sveltestrap-s5-ports/Tooltip.svelte'
 
-    function toggle () {
-        if (get(currentTheme) === 'auto') {
-            setCurrentTheme('dark')
-        } else if (get(currentTheme) === 'dark') {
-            setCurrentTheme('light')
-        } else {
-            setCurrentTheme('auto')
-        }
-    }
+  function toggle() {
+      if (theme.current === 'auto') {
+          setCurrentTheme('dark')
+      } else if (theme.current === 'dark') {
+          setCurrentTheme('light')
+      } else {
+          setCurrentTheme('auto')
+      }
+  }
 </script>
 
 <Button color="link" on:click={toggle} id="button" title="Switch theme">
-    {#if $currentTheme === 'dark'}
+  {#if theme.current === 'dark'}
     <Fa fw icon={faMoon} />
-    {:else if $currentTheme === 'light'}
+  {:else if theme.current === 'light'}
     <Fa fw icon={faSun} />
-    {:else}
+  {:else}
     <Fa fw icon={faCloudSun} />
-    {/if}
+  {/if}
 </Button>
 <Tooltip target="button" animation>
-    {#if $currentTheme === 'dark'}
+  {#if theme.current === 'dark'}
     Dark theme
-    {:else if $currentTheme === 'light'}
+  {:else if theme.current === 'light'}
     Light theme
-    {:else}
+  {:else}
     Automatic theme
-    {/if}
+  {/if}
 </Tooltip>

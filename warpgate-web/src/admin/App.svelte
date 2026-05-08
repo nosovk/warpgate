@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { serverInfo, reloadServerInfo } from 'gateway/lib/store'
+    import { serverInfo, reloadServerInfo } from 'gateway/lib/store.svelte'
 
     import Router, { link, type WrappedComponent } from 'svelte-spa-router'
     import active from 'svelte-spa-router/active'
@@ -59,7 +59,7 @@
             <a href="/@warpgate" class="d-flex logo-link me-4">
                 <Brand />
             </a>
-            {#if $serverInfo?.username}
+            {#if serverInfo.value?.username}
                 <a use:link use:active href="/">Sessions</a>
                 <a use:link use:active href="/config">Config</a>
                 <a use:link use:active href="/log">Log</a>
@@ -75,7 +75,7 @@
 
         <footer class="mt-5">
             <span class="me-auto ms-3">
-                {$serverInfo?.version}
+                {serverInfo.value?.version}
             </span>
             <ThemeSwitcher />
         </footer>

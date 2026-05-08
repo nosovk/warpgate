@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Button, FormGroup, ListGroup, ListGroupItem } from '@sveltestrap/sveltestrap'
     import { api, TargetKind, type ExistingCertificateCredential } from 'gateway/lib/api'
-    import { serverInfo } from 'gateway/lib/store'
+    import { serverInfo } from 'gateway/lib/store.svelte'
     import { makeExampleSSHCommand, makeSSHUsername, makeExampleMySQLCommand, makeExampleMySQLURI, makeMySQLUsername, makeTargetURL, makeExamplePostgreSQLCommand, makePostgreSQLUsername, makeExamplePostgreSQLURI, makeKubeconfig, makeExampleKubectlCommand, makeExampleSCPCommand } from 'common/protocols'
     import { getCertificateKey, getAllCertificateKeys } from 'gateway/lib/certificateStore'
     import CertificateCredentialModal from 'admin/CertificateCredentialModal.svelte'
@@ -122,7 +122,7 @@
     let opts = $derived.by(() => ({
         targetName,
         username,
-        serverInfo: $serverInfo,
+        serverInfo: serverInfo.value,
         ticketSecret,
         targetExternalHost,
         targetDefaultDatabaseName,
@@ -264,7 +264,7 @@
                     {/each}
                 </ListGroup>
 
-                {#if $serverInfo?.ownCredentialManagementAllowed}
+                {#if serverInfo.value?.ownCredentialManagementAllowed}
                 <Button
                     color={certificates.length > 0 ? 'secondary' : 'primary'}
                     class="d-flex w-100 text-center justify-content-center align-items-center gap-2 my-3"

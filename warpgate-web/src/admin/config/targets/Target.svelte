@@ -1,10 +1,10 @@
 <script lang="ts">
     import { api, type Role, type Target, type TargetGroup } from 'admin/lib/api'
-    import { adminPermissions } from '../../lib/store'
+    import { adminPermissions } from '../../lib/store.svelte'
     import AsyncButton from 'common/AsyncButton.svelte'
     import ConnectionInstructions from 'common/ConnectionInstructions.svelte'
     import { TargetKind } from 'gateway/lib/api'
-    import { serverInfo } from 'gateway/lib/store'
+    import { serverInfo } from 'gateway/lib/store.svelte'
     import { replace } from 'svelte-spa-router'
     import { Button, FormGroup, Input, Modal, ModalBody, ModalFooter } from '@sveltestrap/sveltestrap'
     import TlsConfiguration from '../../TlsConfiguration.svelte'
@@ -22,7 +22,7 @@
     let { params }: Props = $props()
 
     let error: string|undefined = $state()
-    let selectedUsername: string|undefined = $state($serverInfo?.username)
+    let selectedUsername: string|undefined = $state(serverInfo.value?.username)
     let target: Target | undefined = $state()
     let roleIsAllowed: Record<string, any> = $state({})
     let connectionsInstructionsModalOpen = $state(false)
@@ -189,9 +189,9 @@
 
             <TlsConfiguration bind:value={target.options.tls} />
 
-            {#if $serverInfo?.externalHost}
+            {#if serverInfo.value?.externalHost}
                 <FormGroup floating label="Bind to a domain">
-                    <Input type="text" placeholder={'foo.' + $serverInfo.externalHost} bind:value={target.options.externalHost} />
+                    <Input type="text" placeholder={'foo.' + serverInfo.value.externalHost} bind:value={target.options.externalHost} />
                 </FormGroup>
             {/if}
         {/if}
@@ -220,7 +220,7 @@
                     <FormGroup floating label="Authenticate using">
                         <select class="form-control" bind:value={target.options.auth!.kind}>
                             <option value="Password">Password</option>
-                            {#if $serverInfo?.runningOnEc2}
+                            {#if serverInfo.value?.runningOnEc2}
                                 <option value="IamRole">IAM Role (experimental)</option>
                             {/if}
                         </select>
@@ -247,7 +247,7 @@
                 <select class="form-control" bind:value={target.options.auth.kind}>
                     <option value="Certificate">Certificate</option>
                     <option value="Token">Token</option>
-                    {#if $serverInfo?.runningOnEc2}
+                    {#if serverInfo.value?.runningOnEc2}
                         <option value="IamRole">IAM Role (experimental)</option>
                     {/if}
                 </select>
@@ -284,7 +284,7 @@
                                 id="role-{role.id}"
                                 class="mb-0 me-2"
                                 type="switch"
-                                disabled={!$adminPermissions.targetsEdit}
+                                disabled={!adminPermissions.value.targetsEdit}
                                 on:change={() => toggleRole(role)}
                                 checked={roleIsAllowed[role.id]} />
                             <div>
@@ -356,14 +356,14 @@
             color="primary"
             class="ms-auto"
             click={update}
-            disabled={!$adminPermissions.targetsEdit}
+            disabled={!adminPermissions.value.targetsEdit}
         >Update configuration</AsyncButton>
 
         <AsyncButton
             class="ms-2"
             color="danger"
             click={remove}
-            disabled={!$adminPermissions.targetsDelete}
+            disabled={!adminPermissions.value.targetsDelete}
         >Remove</AsyncButton>
     </div>
 </div>

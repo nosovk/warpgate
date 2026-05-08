@@ -3,7 +3,7 @@ import { faSignOut } from '@fortawesome/free-solid-svg-icons'
 import Fa from 'svelte-fa'
 
 import { api } from 'gateway/lib/api'
-import { serverInfo, reloadServerInfo } from 'gateway/lib/store'
+import { serverInfo, reloadServerInfo } from 'gateway/lib/store.svelte'
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from '@sveltestrap/sveltestrap'
 
 async function logout () {
@@ -18,15 +18,15 @@ async function singleLogout () {
 }
 </script>
 
-{#if $serverInfo?.username}
+{#if serverInfo.value?.username}
     <a href="/@warpgate/#/profile">
-        {$serverInfo.username}
+        {serverInfo.value.username}
     </a>
-    {#if $serverInfo.authorizedViaTicket}
+    {#if serverInfo.value.authorizedViaTicket}
         <span class="ml-2">(ticket auth)</span>
     {/if}
 
-    {#if $serverInfo?.authorizedViaSsoWithSingleLogout}
+    {#if serverInfo.value?.authorizedViaSsoWithSingleLogout}
         <Dropdown>
             <DropdownToggle color="link" title="Log out options">
                 <Fa icon={faSignOut} fw />

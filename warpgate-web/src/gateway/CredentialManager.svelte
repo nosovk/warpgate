@@ -1,6 +1,6 @@
 <script lang="ts">
     import { api, CredentialKind, PasswordState, type CredentialsState, type ExistingOtpCredential, type ExistingPublicKeyCredential, type ExistingCertificateCredential } from 'gateway/lib/api'
-    import { serverInfo } from 'gateway/lib/store'
+    import { serverInfo } from 'gateway/lib/store.svelte'
     import { deleteCertificateKey } from 'gateway/lib/certificateStore'
     import Alert from 'common/sveltestrap-s5-ports/Alert.svelte'
     import { faCertificate, faIdBadge, faKey, faKeyboard, faMobilePhone } from '@fortawesome/free-solid-svg-icons'
@@ -289,7 +289,7 @@
 {#if creatingOtpCredential}
 <CreateOtpModal
     bind:isOpen={creatingOtpCredential}
-    username={$serverInfo!.username!}
+    username={serverInfo.value!.username!}
     create={createOtp}
 />
 {/if}
@@ -298,7 +298,7 @@
 <CertificateCredentialModal
     bind:isOpen={issuingCertificateCredential}
     save={issueCertificate}
-    username={$serverInfo!.username!}
+    username={serverInfo.value!.username!}
     onClose={() => {
         issuingCertificateCredential = false
     }}

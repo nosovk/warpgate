@@ -8,7 +8,7 @@
     import Loadable from 'common/Loadable.svelte'
     import { replace } from 'svelte-spa-router'
     import Alert from 'common/sveltestrap-s5-ports/Alert.svelte'
-    import { adminPermissions } from 'admin/lib/store'
+    import { adminPermissions } from 'admin/lib/store.svelte'
 
     interface Props {
         params: { id: string };
@@ -147,12 +147,12 @@
                 <AsyncButton
                     click={update}
                     color="primary"
-                    disabled={!$adminPermissions.targetsEdit}
+                    disabled={!adminPermissions.value.targetsEdit}
                 >Update</AsyncButton>
                 <Button
                     color="danger"
                     onclick={remove}
-                    disabled={!$adminPermissions.targetsDelete}
+                    disabled={!adminPermissions.value.targetsDelete}
                 >Remove</Button>
             </div>
         </form>

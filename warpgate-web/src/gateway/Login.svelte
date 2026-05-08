@@ -7,7 +7,7 @@
     import { faGoogle, faMicrosoft, faApple } from '@fortawesome/free-brands-svg-icons'
 
     import { api, ApiAuthState, LoginFailureResponseFromJSON, type SsoProviderDescription, SsoProviderKind, ResponseError } from 'gateway/lib/api'
-    import { reloadServerInfo, serverInfo } from 'gateway/lib/store'
+    import { reloadServerInfo, serverInfo } from 'gateway/lib/store.svelte'
     import { stringifyError } from 'common/errors'
     import Alert from 'common/sveltestrap-s5-ports/Alert.svelte'
     import Loadable from 'common/Loadable.svelte'
@@ -209,7 +209,7 @@
                 </Button>
             </form>
         {/if}
-        {#if (authState === ApiAuthState.NotStarted || authState === ApiAuthState.PasswordNeeded || authState === ApiAuthState.Failed || authState === ApiAuthState.IpRejected) && (!$serverInfo?.minimizePasswordLogin || showPasswordLogin)}
+        {#if (authState === ApiAuthState.NotStarted || authState === ApiAuthState.PasswordNeeded || authState === ApiAuthState.Failed || authState === ApiAuthState.IpRejected) && (!serverInfo.value?.minimizePasswordLogin || showPasswordLogin)}
             <!-- eslint-disable-next-line @typescript-eslint/no-confusing-void-expression -->
             {@render localLoginForm()}
         {/if}
@@ -257,7 +257,7 @@
         </Loadable>
     {/if}
 
-    {#if (authState === ApiAuthState.NotStarted || authState === ApiAuthState.PasswordNeeded || authState === ApiAuthState.Failed || authState === ApiAuthState.IpRejected) && $serverInfo?.minimizePasswordLogin && !showPasswordLogin}
+    {#if (authState === ApiAuthState.NotStarted || authState === ApiAuthState.PasswordNeeded || authState === ApiAuthState.Failed || authState === ApiAuthState.IpRejected) && serverInfo.value?.minimizePasswordLogin && !showPasswordLogin}
         <div class="mt-3 text-center">
             <!-- svelte-ignore a11y_invalid_attribute -->
             <a
