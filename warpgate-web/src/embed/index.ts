@@ -1,5 +1,6 @@
 import { api } from 'gateway/lib/api'
 import EmbeddedUI from './EmbeddedUI.svelte'
+import { mount } from 'svelte'
 
 export { }
 
@@ -17,6 +18,6 @@ const container = document.createElement('div')
 container.id = 'warpgate-embedded-ui'
 document.body.appendChild(container)
 
-setTimeout(() => new EmbeddedUI({
+setTimeout(() => mount(EmbeddedUI, {
     target: container,
 }))

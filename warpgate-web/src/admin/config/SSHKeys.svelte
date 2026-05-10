@@ -53,7 +53,7 @@
 
 <div class="mb-3"></div>
 {#if knownHosts}
-    {#if knownHosts.length }
+    {#if knownHosts.length}
         <h2>Known hosts: {knownHosts.length}</h2>
     {:else}
         <h2>No known hosts</h2>

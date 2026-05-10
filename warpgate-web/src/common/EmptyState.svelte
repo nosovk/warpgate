@@ -1,6 +1,10 @@
 <script lang="ts">
-    export let title: string
-    export let hint = ''
+    interface Props {
+        title: string;
+        hint?: string;
+    }
+
+    let { title, hint = '' }: Props = $props()
 </script>
 
 <div class="empty-state">

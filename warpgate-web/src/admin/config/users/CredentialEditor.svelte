@@ -333,7 +333,7 @@
     <div class="list-group list-group-flush mb-3">
         {#each credentials as credential (credential.id)}
         <div class="list-group-item credential gap-2">
-            {#if credential.kind === CredentialKind.Password }
+            {#if credential.kind === CredentialKind.Password}
                 <Fa fw icon={faKeyboard} />
                 <span class="label me-auto">Password</span>
             {/if}

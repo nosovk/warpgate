@@ -66,20 +66,22 @@
 
 <div class="container-max-md">
   <Loadable promise={initPromise}>
-    <div class="page-summary-bar">
-      <div>
-        <h1>{role!.name}</h1>
-        <div class="text-muted">role</div>
+    {#if role}
+      <div class="page-summary-bar">
+        <div>
+          <h1>{role.name}</h1>
+          <div class="text-muted">role</div>
+        </div>
       </div>
-    </div>
 
-    <FormGroup floating label="Name">
-      <Input bind:value={role!.name} />
-    </FormGroup>
+      <FormGroup floating label="Name">
+        <Input bind:value={role.name} />
+      </FormGroup>
 
-    <FormGroup floating label="Description">
-      <Input bind:value={role!.description} />
-    </FormGroup>
+      <FormGroup floating label="Description">
+        <Input bind:value={role.description} />
+      </FormGroup>
+    {/if}
   </Loadable>
 
   {#if error}

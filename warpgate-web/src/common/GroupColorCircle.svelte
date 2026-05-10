@@ -2,7 +2,11 @@
     import type { BootstrapThemeColor } from 'gateway/lib/api'
     import { getCSSColorFromThemeColor } from './helpers'
 
-    export let color: BootstrapThemeColor | ''
+    interface Props {
+        color: BootstrapThemeColor | '';
+    }
+
+    let { color }: Props = $props()
 </script>
 
 <div class="circle" style="background-color: {getCSSColorFromThemeColor(color || undefined)})"></div>

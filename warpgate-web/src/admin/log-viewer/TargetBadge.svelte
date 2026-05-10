@@ -4,8 +4,12 @@
     import Fa from 'svelte-fa'
     import { faComputer } from '@fortawesome/free-solid-svg-icons'
 
-    export let id: string
-    export let name: string
+    interface Props {
+        id: string;
+        name: string;
+    }
+
+    let { id, name }: Props = $props()
 </script>
 
 <Badge color="primary" class="d-flex align-items-center">

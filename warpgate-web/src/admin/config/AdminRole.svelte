@@ -134,96 +134,103 @@
 
 <div class="container-max-md">
   <Loadable promise={initPromise}>
-    <div class="page-summary-bar">
-      <div>
-        <h1>{role!.name}</h1>
-        <div class="text-muted">admin role</div>
-      </div>
-    </div>
-
-    <FormGroup floating label="Name">
-      <Input bind:value={role!.name} {disabled} />
-    </FormGroup>
-
-    <FormGroup floating label="Description">
-      <Input bind:value={role!.description} {disabled} />
-    </FormGroup>
-
-    <h4 class="mt-4">Permissions</h4>
-    <div class="row g-3">
-      <!-- eslint-disable-next-line svelte/require-each-key -->
-      {#each permGroups as { category, perms }}
-        <div class="col-6">
-          <h5 class="mt-3">{category}</h5>
-          {#each perms as { key, label } (key)}
-            <label class="form-check">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                bind:checked={(role as any)[key]}
-                {disabled}
-                onchange={(e) => {
-                    const checked = (e.target as HTMLInputElement).checked
-                    if (checked) {
-                        enablePermissionDependenciesRecursive(role!, key)
-                    } else {
-                        disablePermissionDependantsRecursive(role!, key)
-                    }
-                }}
-              />
-              <span class="form-check-label">
-                {label}
-                {#if ADMIN_PERMISSIONS.find((p) => p.key === key)?.dangerous}
-                  <span id="warn-{key}" class="text-warning ms-1">⚠️</span>
-                  <Tooltip target="warn-{key}" animation delay="250">
-                    Grants the ability to manage admin roles; use with care.
-                  </Tooltip>
-                {/if}
-              </span>
-            </label>
-          {/each}
+    {#if role}
+      <div class="page-summary-bar">
+        <div>
+          <h1>{role.name}</h1>
+          <div class="text-muted">admin role</div>
         </div>
-      {/each}
-    </div>
-    {#if error}
-      <Alert color="danger">{error}</Alert>
-    {/if}
+      </div>
 
-    <div class="d-flex mt-3">
-      <a href="/log/admin-role/{params.id}" use:link class="btn btn-secondary">
-        Audit log
-      </a>
+      <FormGroup floating label="Name">
+        <Input bind:value={role.name} {disabled} />
+      </FormGroup>
 
-      <AsyncButton color="primary" {disabled} class="ms-auto" click={update}
-        >Update</AsyncButton
-      >
+      <FormGroup floating label="Description">
+        <Input bind:value={role.description} {disabled} />
+      </FormGroup>
 
-      <AsyncButton class="ms-2" {disabled} color="danger" click={remove}
-        >Remove</AsyncButton
-      >
-    </div>
-
-    <h4 class="mt-4">Assigned users</h4>
-    <ItemList load={loadUsers}>
-      {#snippet item(user)}
-        <a
-          class="list-group-item list-group-item-action"
-          href="/config/users/{user.id}"
-          use:link
-        >
-          <div>
-            <strong class="me-auto">
-              {user.username}
-            </strong>
-            {#if user.description}
-              <small class="d-block text-muted">{user.description}</small>
-            {/if}
+      <h4 class="mt-4">Permissions</h4>
+      <div class="row g-3">
+        <!-- eslint-disable-next-line svelte/require-each-key -->
+        {#each permGroups as { category, perms }}
+          <div class="col-6">
+            <h5 class="mt-3">{category}</h5>
+            {#each perms as { key, label } (key)}
+              <label class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  bind:checked={(role as any)[key]}
+                  {disabled}
+                  onchange={(e) => {
+                      const checked = (e.target as HTMLInputElement).checked
+                      if (checked) {
+                          enablePermissionDependenciesRecursive(role!, key)
+                      } else {
+                          disablePermissionDependantsRecursive(role!, key)
+                      }
+                  }}
+                />
+                <span class="form-check-label">
+                  {label}
+                  {#if ADMIN_PERMISSIONS.find((p) => p.key === key)?.dangerous}
+                    <span id="warn-{key}" class="text-warning ms-1">⚠️</span>
+                    <Tooltip target="warn-{key}" animation delay="250">
+                      Grants the ability to manage admin roles; use with care.
+                    </Tooltip>
+                  {/if}
+                </span>
+              </label>
+            {/each}
           </div>
+        {/each}
+      </div>
+      {#if error}
+        <Alert color="danger">{error}</Alert>
+      {/if}
+
+      <div class="d-flex mt-3">
+        <a
+          href="/log/admin-role/{params.id}"
+          use:link
+          class="btn btn-secondary"
+        >
+          Audit log
         </a>
-      {/snippet}
-      {#snippet empty()}
-        <Alert color="info">This admin role has no users assigned to it</Alert>
-      {/snippet}
-    </ItemList>
+
+        <AsyncButton color="primary" {disabled} class="ms-auto" click={update}
+          >Update</AsyncButton
+        >
+
+        <AsyncButton class="ms-2" {disabled} color="danger" click={remove}
+          >Remove</AsyncButton
+        >
+      </div>
+
+      <h4 class="mt-4">Assigned users</h4>
+      <ItemList load={loadUsers}>
+        {#snippet item(user)}
+          <a
+            class="list-group-item list-group-item-action"
+            href="/config/users/{user.id}"
+            use:link
+          >
+            <div>
+              <strong class="me-auto">
+                {user.username}
+              </strong>
+              {#if user.description}
+                <small class="d-block text-muted">{user.description}</small>
+              {/if}
+            </div>
+          </a>
+        {/snippet}
+        {#snippet empty()}
+          <Alert color="info">This admin role has no users assigned to it</Alert
+          >
+        {/snippet}
+      </ItemList>
+    {/if}
   </Loadable>
 </div>

@@ -5,7 +5,11 @@
     import type { SetupState } from 'gateway/lib/api'
     import Fa from 'svelte-fa'
 
-    export let setupState: SetupState
+    interface Props {
+        setupState: SetupState;
+    }
+
+    let { setupState }: Props = $props()
 </script>
 
 <div class="getting-started-help border-secondary">

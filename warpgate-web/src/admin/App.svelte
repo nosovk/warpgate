@@ -15,7 +15,7 @@
 
     const initPromise = init()
 
-    const routes: Record<string, WrappedComponent> = {
+    const routes: Record<string, WrappedComponent> = $state({
         '/': wrap({
             asyncComponent: () => import('./Home.svelte') as any,
         }),
@@ -49,7 +49,7 @@
         '/config': wrap({
             asyncComponent: () => import('./config/Config.svelte') as any,
         }),
-    }
+    })
     routes['/config/*'] = routes['/config']!
 </script>
 

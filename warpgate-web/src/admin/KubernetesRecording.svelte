@@ -67,7 +67,7 @@
                             {/each}
                         </tbody>
                     </table>
-                {:else if item.responseBody.kind?.endsWith('List') }
+                {:else if item.responseBody.kind?.endsWith('List')}
                     {#if item.responseBody.items?.length === 0}
                     <table class="table">
                         <tbody>

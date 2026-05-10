@@ -34,7 +34,7 @@
 
     {#if tickets}
         <div class="page-summary-bar">
-            {#if tickets.length }
+            {#if tickets.length}
                 <h1>access tickets: <span class="counter">{tickets.length}</span></h1>
             {:else}
                 <h1>access tickets</h1>

@@ -99,7 +99,7 @@
   })
 </script>
 
-<svelte:window on:pageshow={onPageResume} />
+<svelte:window onpageshow={onPageResume} />
 
 <div class="container">
   <Loadable promise={initPromise}>

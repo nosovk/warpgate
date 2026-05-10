@@ -8,11 +8,15 @@
         dateAdded?: Date
     }
 
-    export let credential: DatedCredential
+    interface Props {
+        credential: DatedCredential;
+    }
+
+    let { credential }: Props = $props()
 
     const id = uuid()
     const lastUseThreshold = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-    let badge: HTMLElement | undefined
+    let badge: HTMLElement | undefined = $state()
 </script>
 
 <span bind:this={badge}>
