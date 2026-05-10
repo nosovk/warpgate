@@ -1,205 +1,217 @@
 <script lang="ts">
-  import { compare as naturalCompareFactory } from 'natural-orderby'
-  import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
-  import ConnectionInstructions from 'common/ConnectionInstructions.svelte'
-  import ItemList, {
-      type LoadOptions,
-      type PaginatedResponse,
-  } from 'common/ItemList.svelte'
-  import {
-      api,
-      type TargetSnapshot,
-      TargetKind,
-      BootstrapThemeColor,
-  } from 'gateway/lib/api'
-  import Fa from 'svelte-fa'
-  import {
-      Button,
-      Modal,
-      ModalBody,
-      ModalFooter,
-  } from '@sveltestrap/sveltestrap'
-  import { serverInfo } from './lib/store.svelte'
-  import { firstBy } from 'thenby'
-  import GettingStarted from 'common/GettingStarted.svelte'
-  import EmptyState from 'common/EmptyState.svelte'
-  import GroupColorCircle from 'common/GroupColorCircle.svelte'
+    import { Observable, from, map } from 'rxjs'
+    import { compare as naturalCompareFactory } from 'natural-orderby'
+    import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
+    import ConnectionInstructions from 'common/ConnectionInstructions.svelte'
+    import ItemList, {
+        type LoadOptions,
+        type PaginatedResponse,
+    } from 'common/ItemList.svelte'
+    import {
+        api,
+        type TargetSnapshot,
+        TargetKind,
+        BootstrapThemeColor,
+    } from 'gateway/lib/api'
+    import Fa from 'svelte-fa'
+    import {
+        Button,
+        Modal,
+        ModalBody,
+        ModalFooter,
+    } from '@sveltestrap/sveltestrap'
+    import { serverInfo } from './lib/store'
+    import { firstBy } from 'thenby'
+    import GettingStarted from 'common/GettingStarted.svelte'
+    import EmptyState from 'common/EmptyState.svelte'
+    import GroupColorCircle from 'common/GroupColorCircle.svelte'
 
-  let selectedTarget: TargetSnapshot | undefined = $state()
+    let selectedTarget: TargetSnapshot | undefined = $state()
 
-  async function loadTargets(
-      options: LoadOptions,
-  ): Promise<PaginatedResponse<TargetSnapshot>> {
-      let result = await api.getTargets({ search: options.search })
-      const naturalCompare = naturalCompareFactory()
+    function loadTargets(
+        options: LoadOptions,
+    ): Observable<PaginatedResponse<TargetSnapshot>> {
+        return from(api.getTargets({ search: options.search })).pipe(
+            map((result) => {
+                const naturalCompare = naturalCompareFactory()
 
-      result = result.sort(
-          firstBy<TargetSnapshot, boolean>((x: TargetSnapshot) => !x.group)
-          // Natural sort between groups
-              .thenBy((a: TargetSnapshot, b: TargetSnapshot) =>
-                  naturalCompare(
-                      (a.group?.name ?? '').toLowerCase(),
-                      (b.group?.name ?? '').toLowerCase(),
-                  ),
-              )
-          // Natural sort within a group
-              .thenBy((a: TargetSnapshot, b: TargetSnapshot) =>
-                  naturalCompare(a.name.toLowerCase(), b.name.toLowerCase()),
-              ),
-      )
+                result = result.sort(
+                    firstBy<TargetSnapshot, boolean>(
+                        (x: TargetSnapshot) => !x.group,
+                    )
+                    // Natural sort between groups
+                        .thenBy((a: TargetSnapshot, b: TargetSnapshot) =>
+                            naturalCompare(
+                                (a.group?.name ?? '').toLowerCase(),
+                                (b.group?.name ?? '').toLowerCase(),
+                            ),
+                        )
+                    // Natural sort within a group
+                        .thenBy((a: TargetSnapshot, b: TargetSnapshot) =>
+                            naturalCompare(
+                                a.name.toLowerCase(),
+                                b.name.toLowerCase(),
+                            ),
+                        ),
+                )
 
-      return {
-          items: result,
-          offset: 0,
-          total: result.length,
-      }
-  }
+                return {
+                    items: result,
+                    offset: 0,
+                    total: result.length,
+                }
+            }),
+        )
+    }
 
-  function selectTarget(target: TargetSnapshot) {
-      if (target.kind === TargetKind.Http) {
-          if (target.externalHost) {
-              const port = location.port ? `:${location.port}` : ''
-              loadURL(`${location.protocol}//${target.externalHost}${port}`)
-          } else {
-              loadURL(`/?warpgate-target=${target.name}`)
-          }
-      } else {
-          selectedTarget = target
-      }
-  }
+    function selectTarget(target: TargetSnapshot) {
+        if (target.kind === TargetKind.Http) {
+            if (target.externalHost) {
+                const port = location.port ? `:${location.port}` : ''
+                loadURL(`${location.protocol}//${target.externalHost}${port}`)
+            } else {
+                loadURL(`/?warpgate-target=${target.name}`)
+            }
+        } else {
+            selectedTarget = target
+        }
+    }
 
-  function loadURL(url: string) {
-      location.href = url
-  }
+    function loadURL(url: string) {
+        location.href = url
+    }
 
-  interface GroupInfo {
-      id: string;
-      name: string;
-      color: BootstrapThemeColor;
-  }
+    interface GroupInfo {
+        id: string
+        name: string
+        color: BootstrapThemeColor
+    }
 
-  function groupInfoFromTarget(target: TargetSnapshot): GroupInfo {
-      if (!target.group) {
-          return {
-              id: '$ungrouped',
-              name: 'Ungrouped',
-              color: BootstrapThemeColor.Secondary,
-          }
-      }
-      return {
-          id: target.group.id,
-          name: target.group.name,
-          color: target.group.color ?? BootstrapThemeColor.Secondary,
-      }
-  }
+    function groupInfoFromTarget(target: TargetSnapshot): GroupInfo {
+        if (!target.group) {
+            return {
+                id: '$ungrouped',
+                name: 'Ungrouped',
+                color: BootstrapThemeColor.Secondary,
+            }
+        }
+        return {
+            id: target.group.id,
+            name: target.group.name,
+            color: target.group.color ?? BootstrapThemeColor.Secondary,
+        }
+    }
 </script>
 
-{#if serverInfo.value?.setupState}
-  <GettingStarted setupState={serverInfo.value?.setupState} />
+{#if $serverInfo?.setupState}
+    <GettingStarted setupState={$serverInfo?.setupState} />
 {/if}
 
 <ItemList
-  load={loadTargets}
-  showSearch={true}
-  groupObject={groupInfoFromTarget}
-  groupKey={(group) => group.id}
+    load={loadTargets}
+    showSearch={true}
+    groupObject={groupInfoFromTarget}
+    groupKey={(group) => group.id}
 >
-  {#snippet empty()}
+    {#snippet empty()}
     <EmptyState title="You don't have access to any targets yet" />
-  {/snippet}
-  {#snippet groupHeader(group)}
+    {/snippet}
+    {#snippet groupHeader(group)}
     <div class="d-flex align-items-center gap-2 mb-2 mt-4">
-      <GroupColorCircle color={group.color} />
-      <div class="h5 mb-0">{group.name}</div>
+        <GroupColorCircle color={group.color} />
+        <div class="h5 mb-0">{group.name}</div>
     </div>
-  {/snippet}
-  {#snippet item(target)}
+    {/snippet}
+    {#snippet item(target)}
     <a
-      class="list-group-item list-group-item-action target-item"
-      href={target.kind === TargetKind.Http
-          ? target.externalHost
-              ? `${location.protocol}//${target.externalHost}${location.port ? `:${location.port}` : ''}`
-              : `/?warpgate-target=${target.name}`
-          : '/@warpgate/admin'}
-      onclick={(e) => {
-          if (e.metaKey || e.ctrlKey) {
-              return
-          }
-          e.preventDefault()
-          selectTarget(target)
-      }}
+        class="list-group-item list-group-item-action target-item"
+        href={target.kind === TargetKind.Http
+            ? target.externalHost
+                ? `${location.protocol}//${target.externalHost}${location.port ? `:${location.port}` : ''}`
+                : `/?warpgate-target=${target.name}`
+            : '/@warpgate/admin'}
+        onclick={(e) => {
+            if (e.metaKey || e.ctrlKey) {
+                return
+            }
+            e.preventDefault()
+            selectTarget(target)
+        }}
     >
-      <span class="me-auto">
-        <div class="d-flex align-items-center gap-2">
-          {target.name}
-        </div>
-        {#if target.description}
-          <small class="d-block text-muted">{target.description}</small>
+        <span class="me-auto">
+            <div class="d-flex align-items-center gap-2">
+                {target.name}
+            </div>
+            {#if target.description}
+                <small class="d-block text-muted"
+                    >{target.description}</small
+                >
+            {/if}
+        </span>
+        <small class="protocol text-muted ms-auto">
+            {#if target.kind === TargetKind.Ssh}
+                SSH
+            {/if}
+            {#if target.kind === TargetKind.MySql}
+                MySQL
+            {/if}
+            {#if target.kind === TargetKind.Postgres}
+                PostgreSQL
+            {/if}
+            {#if target.kind === TargetKind.Kubernetes}
+                Kubernetes
+            {/if}
+        </small>
+        {#if target.kind === TargetKind.Http}
+            <Fa icon={faArrowRight} fw />
         {/if}
-      </span>
-      <small class="protocol text-muted ms-auto">
-        {#if target.kind === TargetKind.Ssh}
-          SSH
-        {/if}
-        {#if target.kind === TargetKind.MySql}
-          MySQL
-        {/if}
-        {#if target.kind === TargetKind.Postgres}
-          PostgreSQL
-        {/if}
-        {#if target.kind === TargetKind.Kubernetes}
-          Kubernetes
-        {/if}
-      </small>
-      {#if target.kind === TargetKind.Http}
-        <Fa icon={faArrowRight} fw />
-      {/if}
     </a>
-  {/snippet}
+    {/snippet}
 </ItemList>
 
-{#if serverInfo.value?.setupState && !serverInfo.value.setupState.hasTargets}
-  <EmptyState
+{#if $serverInfo?.setupState && !$serverInfo.setupState.hasTargets}
+    <EmptyState
     hint="Once you add targets and assign access, they will appear here"
     title="No other targets yet"
-  />
+    />
 {/if}
 
 <Modal
-  isOpen={!!selectedTarget}
-  toggle={() => (selectedTarget = undefined)}
-  size="lg"
+    isOpen={!!selectedTarget}
+    toggle={() => (selectedTarget = undefined)}
+    size="lg"
 >
-  <ModalBody>
+    <ModalBody>
     {#if selectedTarget}
-      <ConnectionInstructions
-        targetName={selectedTarget.name}
-        username={serverInfo.value?.username}
-        targetKind={selectedTarget.kind ?? TargetKind.Ssh}
-        targetDefaultDatabaseName={selectedTarget.kind === TargetKind.MySql ||
-        selectedTarget.kind === TargetKind.Postgres
-            ? selectedTarget.defaultDatabaseName
-            : undefined}
-      />
+        <ConnectionInstructions
+            targetName={selectedTarget.name}
+            username={$serverInfo?.username}
+            targetKind={selectedTarget.kind ?? TargetKind.Ssh}
+            targetDefaultDatabaseName={selectedTarget.kind ===
+                TargetKind.MySql ||
+            selectedTarget.kind === TargetKind.Postgres
+                ? selectedTarget.defaultDatabaseName
+                : undefined}
+        />
     {/if}
-  </ModalBody>
-  <ModalFooter>
+    </ModalBody>
+    <ModalFooter>
     <Button
-      color="secondary"
-      class="modal-button"
-      block
-      on:click={() => {
-          selectedTarget = undefined
-      }}
+        color="secondary"
+        class="modal-button"
+        block
+        on:click={() => {
+            selectedTarget = undefined
+        }}
     >
-      Close
+        Close
     </Button>
-  </ModalFooter>
+    </ModalFooter>
 </Modal>
 
 <style lang="scss">
-  .target-item {
-    display: flex;
-    align-items: center;
-  }
+    .target-item {
+    display: flex
+    align-items: center
+    }
 </style>

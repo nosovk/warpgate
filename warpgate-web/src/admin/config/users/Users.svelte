@@ -1,105 +1,113 @@
 <script lang="ts">
-  import { type LdapServerResponse, type User, api } from 'admin/lib/api'
-  import { adminPermissions } from 'admin/lib/store.svelte'
-  import ItemList, {
-      type LoadOptions,
-      type PaginatedResponse,
-  } from 'common/ItemList.svelte'
-  import { link, push } from 'svelte-spa-router'
-  import { onMount } from 'svelte'
-  import {
-      Dropdown,
-      DropdownItem,
-      DropdownMenu,
-      DropdownToggle,
-  } from '@sveltestrap/sveltestrap'
-  import { compare as naturalCompareFactory } from 'natural-orderby'
+    import { Observable, from, map } from 'rxjs'
+    import { type LdapServerResponse, type User, api } from 'admin/lib/api'
+    import { adminPermissions } from 'admin/lib/store'
+    import ItemList, {
+        type LoadOptions,
+        type PaginatedResponse,
+    } from 'common/ItemList.svelte'
+    import { link, push } from 'svelte-spa-router'
+    import { onMount } from 'svelte'
+    import {
+        Dropdown,
+        DropdownItem,
+        DropdownMenu,
+        DropdownToggle,
+    } from '@sveltestrap/sveltestrap'
+    import { compare as naturalCompareFactory } from 'natural-orderby'
 
-  let ldapServers = $state<LdapServerResponse[]>([])
+    let ldapServers = $state<LdapServerResponse[]>([])
 
-  async function getUsers(
-      options: LoadOptions,
-  ): Promise<PaginatedResponse<User>> {
-      const users = await api.getUsers({
-          search: options.search,
-      })
-      const sorted = users.sort((a, b) =>
-          naturalCompareFactory()(
-              a.username.toLowerCase(),
-              b.username.toLowerCase(),
-          ),
-      )
+    function getUsers(
+        options: LoadOptions,
+    ): Observable<PaginatedResponse<User>> {
+        return from(
+            api.getUsers({
+                search: options.search,
+            }),
+        ).pipe(
+            map((users) => {
+                const sorted = users.sort((a, b) =>
+                    naturalCompareFactory()(
+                        a.username.toLowerCase(),
+                        b.username.toLowerCase(),
+                    ),
+                )
 
-      return {
-          items: sorted,
-          offset: 0,
-          total: sorted.length,
-      }
-  }
+                return {
+                    items: sorted,
+                    offset: 0,
+                    total: sorted.length,
+                }
+            }),
+        )
+    }
 
-  onMount(() => {
-      api.getLdapServers().then((servers) => {
-          ldapServers = servers
-      })
-  })
+    onMount(() => {
+        api.getLdapServers().then((servers) => {
+            ldapServers = servers
+        })
+    })
 </script>
 
 <div class="container-max-md">
-  <div class="page-summary-bar">
+    <div class="page-summary-bar">
     <h1>users</h1>
     <a
-      class="btn btn-primary ms-auto"
-      href="/config/users/create"
-      class:disabled={!adminPermissions.value.usersCreate}
-      use:link
+        class="btn btn-primary ms-auto"
+        href="/config/users/create"
+        class:disabled={!$adminPermissions.usersCreate}
+        use:link
     >
-      Add a user
+        Add a user
     </a>
     {#if ldapServers.length > 0}
-      <Dropdown>
-        <DropdownToggle caret>Add from LDAP</DropdownToggle>
-        <DropdownMenu>
-          {#each ldapServers as server (server.id)}
-            <DropdownItem
-              onclick={() => {
-                  push(`/config/ldap-servers/${server.id}/users`)
-              }}
-              disabled={!adminPermissions.value.usersCreate}
-            >
-              {server.name}
-            </DropdownItem>
-          {/each}
-        </DropdownMenu>
-      </Dropdown>
+        <Dropdown>
+            <DropdownToggle caret>Add from LDAP</DropdownToggle>
+            <DropdownMenu>
+                {#each ldapServers as server (server.id)}
+                    <DropdownItem
+                        onclick={() => {
+                            push(`/config/ldap-servers/${server.id}/users`)
+                        }}
+                        disabled={!$adminPermissions.usersCreate}
+                    >
+                        {server.name}
+                    </DropdownItem>
+                {/each}
+            </DropdownMenu>
+        </Dropdown>
     {/if}
-  </div>
+    </div>
 
-  <ItemList load={getUsers} showSearch={true}>
+    <ItemList load={getUsers} showSearch={true}>
     {#snippet item(user)}
-      <a
-        class="list-group-item list-group-item-action"
-        href="/config/users/{user.id}"
-        use:link
-      >
-        <div>
-          <strong class="me-auto">
-            {user.username}
-          </strong>
-          {#if user.description}
-            <small class="d-block text-muted">{user.description}</small>
-          {/if}
-        </div>
-        {#if user.ldapServerId}
-          <span class="badge bg-info ms-auto"> LDAP </span>
-        {/if}
-      </a>
+        <a
+            class="list-group-item list-group-item-action"
+            href="/config/users/{user.id}"
+            use:link
+        >
+            <div>
+                <strong class="me-auto">
+                    {user.username}
+                </strong>
+                {#if user.description}
+                    <small class="d-block text-muted"
+                        >{user.description}</small
+                    >
+                {/if}
+            </div>
+            {#if user.ldapServerId}
+                <span class="badge bg-info ms-auto"> LDAP </span>
+            {/if}
+        </a>
     {/snippet}
-  </ItemList>
+    </ItemList>
 </div>
 
 <style lang="scss">
-  .list-group-item {
-    display: flex;
-    align-items: center;
-  }
+    .list-group-item {
+    display: flex
+    align-items: center
+    }
 </style>

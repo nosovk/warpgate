@@ -4,9 +4,9 @@
     import Badge from 'common/sveltestrap-s5-ports/Badge.svelte'
 
     const kinds: {
-        name: string,
-        value: TargetKind,
-        description: string,
+        name: string
+        value: TargetKind
+        description: string
         experimental?: boolean
     }[] = [
         {
@@ -32,7 +32,8 @@
         {
             name: 'Kubernetes',
             value: TargetKind.Kubernetes,
-            description: 'Expose Kubernetes API protocol for tools like kubectl',
+            description:
+            'Expose Kubernetes API protocol for tools like kubectl',
             experimental: true,
         },
     ]
@@ -40,22 +41,22 @@
 
 <div class="container-max-md">
     <div class="page-summary-bar">
-        <h1>add a target</h1>
+    <h1>add a target</h1>
     </div>
 
     <div class="narrow-page">
-        {#each kinds as kind (kind.value)}
-            <NavListItem
-                title={kind.name}
-                description={kind.description}
-                href={`/config/targets/create/${kind.value}`}
-            >
-                {#snippet addonSnippet()}
-                    {#if kind.experimental}
-                        <Badge color="warning">Experimental</Badge>
-                    {/if}
-                {/snippet}
-            </NavListItem>
-        {/each}
+    {#each kinds as kind (kind.value)}
+        <NavListItem
+            title={kind.name}
+            description={kind.description}
+            href={`/config/targets/create/${kind.value}`}
+        >
+            {#snippet addonSnippet()}
+                {#if kind.experimental}
+                    <Badge color="warning">Experimental</Badge>
+                {/if}
+            {/snippet}
+        </NavListItem>
+    {/each}
     </div>
 </div>

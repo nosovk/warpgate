@@ -2,11 +2,11 @@ import { serverInfo } from 'gateway/lib/store.svelte'
 import type { AdminPermissions } from 'gateway/lib/api'
 
 export interface AdminPermissionDef {
-    key: string;
-    label: string;
-    category?: string;
-    deps?: string[];
-    dangerous?: boolean;
+    key: string
+    label: string
+    category?: string
+    deps?: string[]
+    dangerous?: boolean
 }
 
 export const ADMIN_PERMISSIONS = [

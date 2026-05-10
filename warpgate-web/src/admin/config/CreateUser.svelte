@@ -1,6 +1,6 @@
 <script lang="ts">
 import { api } from 'admin/lib/api'
-import { adminPermissions } from '../lib/store.svelte'
+import { adminPermissions } from '../lib/store'
 import AsyncButton from 'common/AsyncButton.svelte'
 import { replace } from 'svelte-spa-router'
 import { Form, FormGroup } from '@sveltestrap/sveltestrap'
@@ -32,7 +32,7 @@ async function create () {
 
     <div class="page-summary-bar">
         <h1>add a user</h1>
-        {#if !adminPermissions.value.usersCreate}
+        {#if !$adminPermissions.usersCreate}
             <Alert color="warning">You do not have permission to create users.</Alert>
         {/if}
     </div>
@@ -45,7 +45,7 @@ async function create () {
             <AsyncButton
             color="primary"
                 click={create}
-                disabled={!adminPermissions.value.usersCreate}
+                disabled={!$adminPermissions.usersCreate}
             >Create user</AsyncButton>
         </Form>
     </div>

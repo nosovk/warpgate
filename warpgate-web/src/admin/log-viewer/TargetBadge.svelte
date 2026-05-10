@@ -5,8 +5,8 @@
     import { faComputer } from '@fortawesome/free-solid-svg-icons'
 
     interface Props {
-        id: string;
-        name: string;
+        id: string
+        name: string
     }
 
     let { id, name }: Props = $props()

@@ -1,75 +1,76 @@
 <script lang="ts">
-  import LogViewer from './log-viewer/LogViewer.svelte'
-  import { Input } from '@sveltestrap/sveltestrap'
-  import { autosave } from 'common/autosave.svelte'
+    import LogViewer from './log-viewer/LogViewer.svelte'
+    import { Input } from '@sveltestrap/sveltestrap'
+    import { autosave } from 'common/autosave'
 
-  interface Props {
-      params?: {
-          id?: string;
-      };
-      filterKind?: FilterKind;
-  }
+    interface Props {
+        params?: {
+            id?: string
+        }
+        filterKind?: FilterKind
+    }
 
-  let { params, filterKind = undefined }: Props = $props()
+    let { params, filterKind = undefined }: Props = $props()
 
-  let target = autosave<'all' | 'audit'>('log.target', 'all')
+    let [target] = autosave<'all' | 'audit'>('log.target', 'all')
 
-  function toggleTarget() {
-      target.value = target.value === 'audit' ? 'all' : 'audit'
-  }
+    function toggleTarget() {
+        $target = $target === 'audit' ? 'all' : 'audit'
+    }
 
-  type FilterKind = 'user' | 'access-role' | 'admin-role'
+    type FilterKind = 'user' | 'access-role' | 'admin-role'
 
-  let filters = $derived({
-      target: filterKind
-          ? 'audit'
-          : target.value === 'audit'
-              ? 'audit'
-              : undefined,
-      relatedUsers: filterKind === 'user' ? params?.id : undefined,
-      relatedAccessRoles: filterKind === 'access-role' ? params?.id : undefined,
-      relatedAdminRoles: filterKind === 'admin-role' ? params?.id : undefined,
-  })
+    let filters = $derived({
+        target: filterKind
+            ? 'audit'
+            : $target === 'audit'
+                ? 'audit'
+                : undefined,
+        relatedUsers: filterKind === 'user' ? params?.id : undefined,
+        relatedAccessRoles:
+        filterKind === 'access-role' ? params?.id : undefined,
+        relatedAdminRoles: filterKind === 'admin-role' ? params?.id : undefined,
+    })
 </script>
 
 <div class="log-page">
-  <div
+    <div
     class="page-summary-bar d-flex align-items-center justify-content-between"
-  >
+    >
     <h1>
-      {#if filterKind === 'user'}
-        user audit log: UID <code>{params?.id}</code>
-      {:else if filterKind === 'access-role'}
-        access role audit log: ID <code>{params?.id}</code>
-      {:else if filterKind === 'admin-role'}
-        admin role audit log: ID <code>{params?.id}</code>
-      {:else}
-        log
-      {/if}
+        {#if filterKind === 'user'}
+            user audit log: UID <code>{params?.id}</code>
+        {:else if filterKind === 'access-role'}
+            access role audit log: ID <code>{params?.id}</code>
+        {:else if filterKind === 'admin-role'}
+            admin role audit log: ID <code>{params?.id}</code>
+        {:else}
+            log
+        {/if}
     </h1>
     <div class="d-flex align-items-center gap-3">
-      {#if !filterKind}
-        <Input
-          type="switch"
-          id="auditOnlyToggle"
-          label="Audit log only"
-          checked={target.value === 'audit'}
-          on:change={toggleTarget}
-        />
-      {/if}
+        {#if !filterKind}
+            <Input
+                type="switch"
+                id="auditOnlyToggle"
+                label="Audit log only"
+                checked={$target === 'audit'}
+                on:change={toggleTarget}
+            />
+        {/if}
     </div>
-  </div>
+    </div>
 
-  {#key `${target.value}-${filterKind}-${params?.id}`}
+    {#key `${$target}-${filterKind}-${params?.id}`}
     <LogViewer {filters} />
-  {/key}
+    {/key}
 </div>
 
 <style lang="scss">
-  .log-page {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 0;
-  }
+    .log-page {
+    display: flex
+    flex-direction: column
+    height: 100%
+    min-height: 0
+    }
 </style>

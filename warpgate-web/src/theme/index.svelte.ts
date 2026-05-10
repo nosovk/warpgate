@@ -10,6 +10,7 @@ class ThemeState {
     current = $state<ThemeName>(savedTheme)
     currentFile = $state<ThemeFileName>('dark')
 }
+
 export const theme = new ThemeState()
 
 const styleElement = document.createElement('style')
@@ -24,8 +25,8 @@ function loadThemeFile(name: ThemeFileName) {
 }
 
 async function loadTheme(name: ThemeFileName) {
-    const loadedTheme = (await loadThemeFile(name)).default
-    styleElement.innerHTML = loadedTheme
+    const themeContent = (await loadThemeFile(name)).default
+    styleElement.innerHTML = themeContent
 }
 
 window
@@ -36,17 +37,17 @@ window
         }
     })
 
-export function setCurrentTheme(themeInput: ThemeName): void {
-    localStorage.setItem('theme', themeInput)
-    theme.current = themeInput
-    if (themeInput === 'auto') {
+export function setCurrentTheme(themeName: ThemeName): void {
+    localStorage.setItem('theme', themeName)
+    theme.current = themeName
+    if (themeName === 'auto') {
         if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
             loadTheme('dark')
         } else {
             loadTheme('light')
         }
     } else {
-        loadTheme(themeInput)
+        loadTheme(themeName)
     }
 }
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { serverInfo } from 'gateway/lib/store.svelte'
+    import { serverInfo } from 'gateway/lib/store'
     import Alert from 'common/sveltestrap-s5-ports/Alert.svelte'
     import CredentialManager from './CredentialManager.svelte'
 </script>
@@ -8,8 +8,8 @@
     <h1>Credentials</h1>
 </div>
 
-{#if serverInfo.value}
-    {#if serverInfo.value.ownCredentialManagementAllowed}
+{#if $serverInfo}
+    {#if $serverInfo.ownCredentialManagementAllowed}
         <CredentialManager />
     {:else}
         <Alert color="info">

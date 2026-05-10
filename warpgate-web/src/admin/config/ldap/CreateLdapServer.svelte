@@ -1,8 +1,14 @@
 <script lang="ts">
     import { FormGroup, Input } from '@sveltestrap/sveltestrap'
     import { push } from 'svelte-spa-router'
-    import { reloadServerInfo } from 'gateway/lib/store.svelte'
-    import { api, LdapUsernameAttribute, stringifyError, TlsMode, type Tls } from 'admin/lib/api'
+    import { reloadServerInfo } from 'gateway/lib/store'
+    import {
+        api,
+        LdapUsernameAttribute,
+        stringifyError,
+        TlsMode,
+        type Tls,
+    } from 'admin/lib/api'
     import AsyncButton from 'common/AsyncButton.svelte'
     import Alert from 'common/sveltestrap-s5-ports/Alert.svelte'
     import LdapConnectionFields from './LdapConnectionFields.svelte'
@@ -26,7 +32,11 @@
         mode: TlsMode.Preferred,
         verify: true,
     })
-    let testResult = $state<{ success: boolean; message: string; baseDns?: string[] } | null>(null)
+    let testResult = $state<{
+        success: boolean
+        message: string
+        baseDns?: string[]
+    } | null>(null)
 
     // Auto-update port based on TLS mode
     $effect(() => {
@@ -84,56 +94,63 @@
 
 <div class="container-max-md">
     {#if error}
-        <Alert color="danger">{error}</Alert>
+    <Alert color="danger">{error}</Alert>
     {/if}
 
     <div class="page-summary-bar">
-        <h1>add an LDAP server</h1>
+    <h1>add an LDAP server</h1>
     </div>
 
-    <form onsubmit={e => {e.preventDefault(); create()}}>
-        <FormGroup floating label="Name">
-            <Input
-                bind:value={name}
-                required
-            />
-        </FormGroup>
+    <form
+    onsubmit={(e) => {
+        e.preventDefault()
+        create()
+    }}
+    >
+    <FormGroup floating label="Name">
+        <Input bind:value={name} required />
+    </FormGroup>
 
-        <LdapConnectionFields
-            bind:host
-            bind:port
-            bind:bindDn
-            bind:bindPassword
-            bind:tls
-            bind:userFilter
-            bind:usernameAttribute
-            bind:sshKeyAttribute
-            bind:uuidAttribute
-        />
+    <LdapConnectionFields
+        bind:host
+        bind:port
+        bind:bindDn
+        bind:bindPassword
+        bind:tls
+        bind:userFilter
+        bind:usernameAttribute
+        bind:sshKeyAttribute
+        bind:uuidAttribute
+    />
 
-        {#if testResult}
-            <div class="alert {testResult.success ? 'alert-success' : 'alert-danger'}" role="alert">
-                {testResult.message}
-                {#if testResult.baseDns && testResult.baseDns.length > 0}
-                    <div class="mt-2">
-                        <strong>Discovered Base DNs:</strong>
-                        <ul class="mb-0 mt-1">
-                            {#each testResult.baseDns as dn (dn)}
-                                <li><code>{dn}</code></li>
-                            {/each}
-                        </ul>
-                    </div>
-                {/if}
-            </div>
-        {/if}
-
-        <div class="d-flex gap-2 mt-5">
-            <AsyncButton type="button" class="me-auto" click={testConnection}>
-                Test connection
-            </AsyncButton>
-            <AsyncButton type="submit" color="primary" click={create}>
-                Create
-            </AsyncButton>
+    {#if testResult}
+        <div
+            class="alert {testResult.success
+                ? 'alert-success'
+                : 'alert-danger'}"
+            role="alert"
+        >
+            {testResult.message}
+            {#if testResult.baseDns && testResult.baseDns.length > 0}
+                <div class="mt-2">
+                    <strong>Discovered Base DNs:</strong>
+                    <ul class="mb-0 mt-1">
+                        {#each testResult.baseDns as dn (dn)}
+                              <li><code>{dn}</code></li>
+                        {/each}
+                    </ul>
+                </div>
+            {/if}
         </div>
+    {/if}
+
+    <div class="d-flex gap-2 mt-5">
+        <AsyncButton type="button" class="me-auto" click={testConnection}>
+            Test connection
+        </AsyncButton>
+        <AsyncButton type="submit" color="primary" click={create}>
+            Create
+        </AsyncButton>
+    </div>
     </form>
 </div>

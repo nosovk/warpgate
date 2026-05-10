@@ -212,6 +212,15 @@ export default [
       "svelte/no-reactive-functions": "error",
       "svelte/no-reactive-literals": "error",
       "svelte/no-navigation-without-resolve": "off",
+      "@stylistic/semi": ["error", "never"],
+      "@stylistic/indent": ["error", 4],
+      "@stylistic/quotes": [
+        "error",
+        "single",
+        {
+          allowTemplateLiterals: "always",
+        },
+      ],
     },
   },
 ];

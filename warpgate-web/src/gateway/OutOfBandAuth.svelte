@@ -1,60 +1,53 @@
 <script lang="ts">
-    import { api, ApiAuthState, type AuthStateResponseInternal } from 'gateway/lib/api'
+    import {
+        api,
+        ApiAuthState,
+        type AuthStateResponseInternal,
+    } from 'gateway/lib/api'
     import AsyncButton from 'common/AsyncButton.svelte'
     import RelativeDate from 'admin/RelativeDate.svelte'
     import Alert from 'common/sveltestrap-s5-ports/Alert.svelte'
     import Loadable from 'common/Loadable.svelte'
 
     interface Props {
-        params: { stateId: string };
+        params: { stateId: string }
     }
 
     let { params }: Props = $props()
 
     let authState: AuthStateResponseInternal | undefined = $state()
 
-    async function reload () {
+    async function reload() {
         authState = await api.getAuthState({ id: params.stateId })
     }
 
-    async function init () {
+    async function init() {
         await reload()
     }
 
-    async function approve () {
+    async function approve() {
         api.approveAuth({ id: params.stateId })
         await reload()
         window.close()
     }
 
-    async function reject () {
+    async function reject() {
         api.rejectAuth({ id: params.stateId })
         await reload()
         window.close()
     }
 </script>
 
-<style lang="scss">
-    .identification-string {
-        display: flex;
-        font-size: 3rem;
-
-        .card {
-            padding: 0rem 0.5rem;
-            border-radius: .5rem;
-            margin-right: .5rem;
-        }
-    }
-</style>
-
 <Loadable promise={init()}>
-{#if authState}
+    {#if authState}
     <div class="page-summary-bar">
         <h1>authorization request</h1>
     </div>
 
     <div class="mb-5">
-        <div class="mb-2">Ensure this security key matches your authentication prompt:</div>
+        <div class="mb-2">
+            Ensure this security key matches your authentication prompt:
+        </div>
         <div class="identification-string">
             <!-- eslint-disable-next-line svelte/require-each-key -->
             {#each authState?.identificationString as char}
@@ -76,13 +69,9 @@
     </div>
 
     {#if authState.state === ApiAuthState.Success}
-        <Alert color="success">
-            Approved
-        </Alert>
+        <Alert color="success">Approved</Alert>
     {:else if authState.state === ApiAuthState.Failed}
-        <Alert color="danger">
-            Rejected
-        </Alert>
+        <Alert color="danger">Rejected</Alert>
     {:else}
         <div class="d-flex">
             <AsyncButton
@@ -101,5 +90,17 @@
             </AsyncButton>
         </div>
     {/if}
-{/if}
+    {/if}
 </Loadable>
+
+<style lang="scss">
+    .identification-string {
+    display: flex
+    font-size: 3rem
+    .card {
+        padding: 0rem 0.5rem
+        border-radius: .5rem
+        margin-right: .5rem
+    }
+    }
+</style>

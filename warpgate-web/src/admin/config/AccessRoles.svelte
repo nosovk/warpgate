@@ -1,67 +1,78 @@
 <script lang="ts">
-  import { type Role, api } from 'admin/lib/api'
-  import ItemList, {
-      type LoadOptions,
-      type PaginatedResponse,
-  } from 'common/ItemList.svelte'
-  import { link } from 'svelte-spa-router'
-  import { compare as naturalCompareFactory } from 'natural-orderby'
-  import { adminPermissions } from '../lib/store.svelte'
+    import { Observable, from, map } from 'rxjs'
+    import { type Role, api } from 'admin/lib/api'
+    import ItemList, {
+        type LoadOptions,
+        type PaginatedResponse,
+    } from 'common/ItemList.svelte'
+    import { link } from 'svelte-spa-router'
+    import { compare as naturalCompareFactory } from 'natural-orderby'
+    import { adminPermissions } from '../lib/store'
 
-  async function getRoles(
-      options: LoadOptions,
-  ): Promise<PaginatedResponse<Role>> {
-      const roles = await api.getRoles({
-          search: options.search,
-      })
-      const sorted = roles.sort((a, b) =>
-          naturalCompareFactory()(a.name.toLowerCase(), b.name.toLowerCase()),
-      )
+    function getRoles(
+        options: LoadOptions,
+    ): Observable<PaginatedResponse<Role>> {
+        return from(
+            api.getRoles({
+                search: options.search,
+            }),
+        ).pipe(
+            map((roles) => {
+                const sorted = roles.sort((a, b) =>
+                    naturalCompareFactory()(
+                        a.name.toLowerCase(),
+                        b.name.toLowerCase(),
+                    ),
+                )
 
-      return {
-          items: sorted,
-          offset: 0,
-          total: sorted.length,
-      }
-  }
+                return {
+                    items: sorted,
+                    offset: 0,
+                    total: sorted.length,
+                }
+            }),
+        )
+    }
 </script>
 
 <div class="container-max-md">
-  <div class="page-summary-bar">
+    <div class="page-summary-bar">
     <h1>roles</h1>
     <a
-      class="btn btn-primary ms-auto"
-      href="/config/access-roles/create"
-      class:disabled={!adminPermissions.value.accessRolesCreate}
-      use:link
-    >
-      Add a role
-    </a>
-  </div>
-
-  <ItemList load={getRoles} showSearch={true}>
-    {#snippet item(role)}
-      <a
-        class="list-group-item list-group-item-action"
-        href="/config/access-roles/{role.id}"
+        class="btn btn-primary ms-auto"
+        href="/config/access-roles/create"
+        class:disabled={!$adminPermissions.accessRolesCreate}
         use:link
-      >
-        <div>
-          <strong class="me-auto">
-            {role.name}
-          </strong>
-          {#if role.description}
-            <small class="d-block text-muted">{role.description}</small>
-          {/if}
-        </div>
-      </a>
+    >
+        Add a role
+    </a>
+    </div>
+
+    <ItemList load={getRoles} showSearch={true}>
+    {#snippet item(role)}
+        <a
+            class="list-group-item list-group-item-action"
+            href="/config/access-roles/{role.id}"
+            use:link
+        >
+            <div>
+                <strong class="me-auto">
+                    {role.name}
+                </strong>
+                {#if role.description}
+                    <small class="d-block text-muted"
+                        >{role.description}</small
+                    >
+                {/if}
+            </div>
+        </a>
     {/snippet}
-  </ItemList>
+    </ItemList>
 </div>
 
 <style lang="scss">
-  .list-group-item {
-    display: flex;
-    align-items: center;
-  }
+    .list-group-item {
+    display: flex
+    align-items: center
+    }
 </style>

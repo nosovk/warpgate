@@ -1,73 +1,68 @@
 <script lang="ts">
-  import {
-      Button,
-      Form,
-      FormGroup,
-      Input,
-      Modal,
-      ModalBody,
-      ModalFooter,
-  } from '@sveltestrap/sveltestrap'
+    import {
+        Button,
+        Form,
+        FormGroup,
+        Input,
+        Modal,
+        ModalBody,
+        ModalFooter,
+    } from '@sveltestrap/sveltestrap'
 
-  interface Props {
-      isOpen: boolean;
-      create: (password: string) => void;
-  }
+    interface Props {
+        isOpen: boolean
+        create: (password: string) => void
+    }
 
-  let { isOpen = $bindable(true), create }: Props = $props()
-  let password = $state('')
-  let field: HTMLInputElement | undefined = $state()
-  let validated = $state(false)
+    let { isOpen = $bindable(true), create }: Props = $props()
+    let password = $state('')
+    let field: HTMLInputElement | undefined = $state()
+    let validated = $state(false)
 
-  function _save() {
-      if (!password) {
-          return
-      }
-      isOpen = false
-      create(password)
-      password = ''
-  }
+    function _save() {
+        if (!password) {
+            return
+        }
+        isOpen = false
+        create(password)
+        password = ''
+    }
 
-  function _cancel() {
-      isOpen = false
-      password = ''
-  }
+    function _cancel() {
+        isOpen = false
+        password = ''
+    }
 </script>
 
 <Modal toggle={_cancel} {isOpen} on:open={() => field?.focus()}>
-  <Form
+    <Form
     {validated}
-    novalidate
     on:submit={(e) => {
         _save()
         e.preventDefault()
     }}
-  >
+    >
     <ModalBody>
-      <FormGroup floating label="Enter a new password" spacing="0">
-        <Input
-          bind:inner={field}
-          type="password"
-          placeholder="New password"
-          required
-          bind:value={password}
-        />
-      </FormGroup>
+        <FormGroup floating label="Enter a new password" spacing="0">
+            <Input
+                bind:inner={field}
+                type="password"
+                placeholder="New password"
+                required
+                bind:value={password}
+            />
+        </FormGroup>
     </ModalBody>
     <ModalFooter>
-      <Button
-        type="submit"
-        class="modal-button"
-        color="primary"
-        on:click={() => (validated = true)}>Create</Button
-      >
+        <Button
+            class="modal-button"
+            color="primary"
+            on:click={() => (validated = true)}>Create</Button
+        >
 
-      <Button
-        type="button"
-        class="modal-button"
-        color="danger"
-        on:click={_cancel}>Cancel</Button
-      >
+        <Button class="modal-button" color="danger" on:click={_cancel}
+            >Cancel</Button
+        >
     </ModalFooter>
-  </Form>
+    </Form>
 </Modal>
