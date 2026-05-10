@@ -153,8 +153,8 @@
       <main>
         <Router
           {routes}
-          on:routeLoaded={(e) => {
-              doNotShowAuthRequests = !!(e.detail.userData as any)?.[
+          onRouteLoaded={(e) => {
+              doNotShowAuthRequests = !!(e.userData as any)?.[
                   'doNotShowAuthRequests'
               ]
           }}
