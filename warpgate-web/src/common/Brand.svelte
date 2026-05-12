@@ -4,18 +4,25 @@
     import { currentThemeFile } from 'theme'
     import { get } from 'svelte/store'
 
-    let element: HTMLElement|undefined = $state()
+    let element: HTMLElement | undefined = $state()
 
     let s = currentThemeFile.subscribe(colorizeByTheme)
 
-    function colorize (r: number, g: number, b: number, dr: number, dg: number, db: number) {
+    function colorize(
+        r: number,
+        g: number,
+        b: number,
+        dr: number,
+        dg: number,
+        db: number,
+    ) {
         element?.querySelectorAll('path').forEach((p, idx) => {
             let d = idx
             p.style.fill = `rgb(${r + d * dr}, ${g + d * dg}, ${b + d * db})`
         })
     }
 
-    function colorizeByTheme () {
+    function colorizeByTheme() {
         if (get(currentThemeFile) === 'light') {
             colorize(49, 57, 72, -1, 1, 3)
         } else {
@@ -27,24 +34,22 @@
         colorizeByTheme()
     })
 
-onDestroy(s)
+    onDestroy(s)
 </script>
-
 
 <div bind:this={element} class="brand">
     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
     {@html logo}
 </div>
 
-
 <style lang="scss">
     :global(svg) {
-        width: auto;
-        display: block;
-        max-height: 100%;
+    width: auto
+    display: block
+    max-height: 100%
     }
 
     .brand {
-        height: 22px;
+    height: 22px
     }
 </style>

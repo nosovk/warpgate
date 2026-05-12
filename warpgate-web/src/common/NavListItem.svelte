@@ -7,14 +7,14 @@
     import type { Snippet } from 'svelte'
 
     interface Props {
-        class?: string,
-        title?: string,
-        titleSnippet?: Snippet<[]>,
-        description?: string,
-        descriptionSnippet?: Snippet<[]>,
-        addonSnippet?: Snippet<[]>,
-        href: string,
-        small?: boolean,
+        class?: string
+        title?: string
+        titleSnippet?: Snippet<[]>
+        description?: string
+        descriptionSnippet?: Snippet<[]>
+        addonSnippet?: Snippet<[]>
+        href: string
+        small?: boolean
     }
 
     let {
@@ -28,105 +28,92 @@
         small,
     }: Props = $props()
 
-    let classes = $derived(classnames(
-        className,
-        'link',
-        small ? 'sm' : false,
-    ))
+    let classes = $derived(classnames(className, 'link', small ? 'sm' : false))
 </script>
 
-<a
-    class={classes}
-    href={href}
-    use:link
-    use:active
->
+<a class={classes} {href} use:link use:active>
     <div class="text">
-        <div class="title">
-            {#if titleSnippet}
-                {@render titleSnippet()}
-            {:else}
-                {title}
-            {/if}
-        </div>
-        <div class="description text-muted">
-            {#if descriptionSnippet}
-                {@render descriptionSnippet()}
-            {:else if description}
-                {description}
-            {/if}
-        </div>
+    <div class="title">
+        {#if titleSnippet}
+            {@render titleSnippet()}
+        {:else}
+            {title}
+        {/if}
+    </div>
+    <div class="description text-muted">
+        {#if descriptionSnippet}
+            {@render descriptionSnippet()}
+        {:else if description}
+            {description}
+        {/if}
+    </div>
     </div>
     {@render addonSnippet?.()}
     <div class="icon">
-        <Fa class="icon" icon={faArrowRight} />
+    <Fa class="icon" icon={faArrowRight} />
     </div>
 </a>
 
-
 <style lang="scss">
     a {
-        cursor: pointer;
-        display: flex;
-        width: 100%;
-        text-decoration: none;
-        padding: 0.8rem 1.5rem 1rem;
-        border-radius: var(--bs-border-radius);
-        align-items: center;
-        gap: 1rem;
+    cursor: pointer
+    display: flex
+    width: 100%
+    text-decoration: none
+    padding: 0.8rem 1.5rem 1rem
+    border-radius: var(--bs-border-radius)
+    align-items: center
+    gap: 1rem
+    .text {
+        flex-grow: 1
+    }
 
-        .text {
-            flex-grow: 1;
-        }
-
-        &:hover, &.active {
-            background: var(--bs-list-group-action-hover-bg);
-            .title {
-                color: var(--bs-list-group-action-hover-color);
-            }
-        }
-
-        &:active {
-            background: var(--bs-list-group-action-active-bg);
-            .title {
-                color: var(--bs-list-group-action-active-color);
-            }
-        }
-
+    &:hover, &.active {
+        background: var(--bs-list-group-action-hover-bg)
         .title {
-            margin-bottom: 0.25rem;
-            font-size: 1.25rem;
-
-            text-decoration: underline;
-            text-decoration-color: var(--wg-link-underline-color);
-            text-underline-offset: 2px;
+            color: var(--bs-list-group-action-hover-color)
         }
+    }
 
-        &.link:hover .title {
-            text-decoration-color: var(--wg-link-hover-underline-color);
+    &:active {
+        background: var(--bs-list-group-action-active-bg)
+        .title {
+            color: var(--bs-list-group-action-active-color)
+        }
+    }
+
+    .title {
+        margin-bottom: 0.25rem
+        font-size: 1.25rem
+        text-decoration: underline
+        text-decoration-color: var(--wg-link-underline-color)
+        text-underline-offset: 2px
+    }
+
+    &.link:hover .title {
+        text-decoration-color: var(--wg-link-hover-underline-color)
+    }
+
+    .description {
+        text-decoration: none
+        line-height: 1rem
+        font-size: 0.9rem
+    }
+
+    &.sm {
+        padding: 0.5rem 1rem
+        .title {
+            font-size: 1rem
         }
 
         .description {
-            text-decoration: none;
-            line-height: 1rem;
-            font-size: 0.9rem;
+            font-size: 0.8rem
         }
 
-        &.sm {
-            padding: 0.5rem 1rem;
-
-            .title {
-                font-size: 1rem;
-            }
-
-            .description {
-                font-size: 0.8rem;
-            }
-
-            .icon {
-                display: none;
-            }
+        .icon {
+            display: none
         }
+    }
     }
 
 </style>

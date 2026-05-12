@@ -16,60 +16,53 @@
         create: (label: string, expiry: Date) => void
     }
 
-    let {
-        isOpen = $bindable(true),
-        create,
-    }: Props = $props()
+    let { isOpen = $bindable(true), create }: Props = $props()
     let label = $state('')
-    let expiry = $state(new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString())
-    let field: HTMLInputElement|undefined = $state()
+    let expiry = $state(
+        new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(),
+    )
+    let field: HTMLInputElement | undefined = $state()
     let validated = $state(false)
 
-    function _save () {
+    function _save() {
         create(label, new Date(expiry))
         _cancel()
     }
 
-    function _cancel () {
+    function _cancel() {
         isOpen = false
         label = ''
     }
 </script>
 
-<Modal toggle={_cancel} isOpen={isOpen} on:open={() => field?.focus()}>
-    <Form {validated} on:submit={e => {
+<Modal toggle={_cancel} {isOpen} on:open={() => field?.focus()}>
+    <Form
+    {validated}
+    on:submit={(e) => {
         _save()
         e.preventDefault()
-    }}>
-        <ModalHeader>
-            New API token
-        </ModalHeader>
-        <ModalBody>
-            <FormGroup floating label="Descriptive label">
-                <Input
-                    bind:inner={field}
-                    required
-                    bind:value={label} />
-            </FormGroup>
+    }}
+    >
+    <ModalHeader>New API token</ModalHeader>
+    <ModalBody>
+        <FormGroup floating label="Descriptive label">
+            <Input bind:inner={field} required bind:value={label} />
+        </FormGroup>
 
-            <FormGroup floating label="Expiry" spacing="0">
-                <Input
-                    type="datetime-local"
-                    bind:value={expiry}  />
-            </FormGroup>
-        </ModalBody>
-        <ModalFooter>
-            <Button
-                color="primary"
-                class="modal-button"
-                on:click={() => validated = true}
-            >Create</Button>
+        <FormGroup floating label="Expiry" spacing="0">
+            <Input type="datetime-local" bind:value={expiry} />
+        </FormGroup>
+    </ModalBody>
+    <ModalFooter>
+        <Button
+            color="primary"
+            class="modal-button"
+            on:click={() => (validated = true)}>Create</Button
+        >
 
-            <Button
-                color="danger"
-                class="modal-button"
-                on:click={_cancel}
-            >Cancel</Button>
-        </ModalFooter>
+        <Button color="danger" class="modal-button" on:click={_cancel}
+            >Cancel</Button
+        >
+    </ModalFooter>
     </Form>
 </Modal>

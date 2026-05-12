@@ -38,13 +38,20 @@
         searchTerm
             ? users.filter(
                 (u) =>
-                    u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    u.displayName?.toLowerCase().includes(searchTerm.toLowerCase()))
+                    u.username
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase()) ||
+                    u.email
+                        ?.toLowerCase()
+                        .includes(searchTerm.toLowerCase()) ||
+                    u.displayName
+                        ?.toLowerCase()
+                        .includes(searchTerm.toLowerCase()),
+            )
             : users,
     )
 
-    async function batchImport () {
+    async function batchImport() {
         error = null
         success = null
         try {
@@ -62,7 +69,6 @@
         }
     }
 </script>
-
 
 {#if error}
     <Alert color="danger">{error}</Alert>
@@ -94,9 +100,13 @@
                 />
             </div>
 
-            <div class="d-flex justify-content-between align-items-center mb-2">
+            <div
+                class="d-flex justify-content-between align-items-center mb-2"
+            >
                 <span class="text-muted">
-                    {filteredUsers.length} users {searchTerm ? `(filtered from ${users.length})` : ''}
+                    {filteredUsers.length} users {searchTerm
+                        ? `(filtered from ${users.length})`
+                        : ''}
                 </span>
                 <div class="d-flex gap-2">
                     <AsyncButton
@@ -106,7 +116,10 @@
                     >
                         Import {selectedUserDns.length} selected
                     </AsyncButton>
-                    <AsyncButton class="btn btn-sm btn-secondary" click={loadUsers}>
+                    <AsyncButton
+                        class="btn btn-sm btn-secondary"
+                        click={loadUsers}
+                    >
                         <Fa icon={faRefresh} />
                     </AsyncButton>
                 </div>
@@ -114,24 +127,28 @@
 
             <div class="list-group">
                 {#each filteredUsers as user (user.dn)}
-                    <div class="list-group-item d-flex align-items-center gap-3">
+                    <div
+                        class="list-group-item d-flex align-items-center gap-3"
+                    >
                         <input
-                            type="checkbox"
-                            class="form-check-input"
-                            bind:group={selectedUserDns}
-                            value={user.dn}
-                            aria-label="Select user"
+                              type="checkbox"
+                              class="form-check-input"
+                              bind:group={selectedUserDns}
+                              value={user.dn}
+                              aria-label="Select user"
                         />
                         <div class="flex-grow-1">
-                            <div>
-                                <h6 class="mb-1">
-                                    {user.username}
-                                    {#if user.displayName && user.displayName !== user.username}
-                                        <small class="text-muted ms-1">({user.displayName})</small>
-                                    {/if}
-                                </h6>
-                            </div>
-                            <small class="text-muted">DN: {user.dn}</small>
+                              <div>
+                                  <h6 class="mb-1">
+                                      {user.username}
+                                      {#if user.displayName && user.displayName !== user.username}
+                                          <small class="text-muted ms-1"
+                                              >({user.displayName})</small
+                                          >
+                                      {/if}
+                                  </h6>
+                              </div>
+                              <small class="text-muted">DN: {user.dn}</small>
                         </div>
                     </div>
                 {/each}

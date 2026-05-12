@@ -1,9 +1,8 @@
 <script module lang="ts">
     /** eslint-disable @typescript-eslint/ban-ts-comment */
 </script>
-<script lang="ts">
-    import { run } from 'svelte/legacy'
 
+<script lang="ts">
     import { onDestroy, onMount } from 'svelte'
     import { createPopper } from '@popperjs/core'
     import { classnames, uuid } from './_sveltestrapUtils'
@@ -38,29 +37,29 @@
     }: Props = $props()
 
     /**
-    * @type {string}
-    */
+       * @type {string}
+       */
     let bsPlacement: string = $state('')
     /**
-    * @type {object}
-    */
+       * @type {object}
+       */
     let popperInstance: any = $state()
     /**
-    * @type {string}
-    */
+       * @type {string}
+       */
     // svelte-ignore state_referenced_locally
     let popperPlacement = $state(placement)
     /**
-    * @type {any}
-    */
+       * @type {any}
+       */
     let targetEl: any = $state()
     /**
-    * @type {any}
-    */
+       * @type {any}
+       */
     let tooltipEl: any = $state()
     /**
-    * @type {any}
-    */
+       * @type {any}
+       */
     let showTimer: any
 
     const checkPopperPlacement = {
@@ -71,7 +70,6 @@
             popperPlacement = state.placement
         },
     }
-
 
     const open = () => {
         clearTimeout(showTimer)
@@ -90,9 +88,7 @@
         clearTimeout(showTimer)
     })
 
-
     function registerEventListeners() {
-
         if (target == null || !target) {
             targetEl = null
             return
@@ -104,17 +100,17 @@
                 targetEl = target
             }
         } catch {
-            // fails on SSR
+        // fails on SSR
         }
 
         // If targetEl has not been found yet
 
         if (targetEl == null) {
-            // Check if target can be found via querySelector
+        // Check if target can be found via querySelector
             try {
                 targetEl = document.querySelector(`#${target}`)
             } catch {
-                // fails on SSR
+            // fails on SSR
             }
         }
 
@@ -137,7 +133,7 @@
         }
     }
 
-    run(() => {
+    $effect(() => {
         if (isOpen && tooltipEl) {
             popperInstance = createPopper(targetEl, tooltipEl, {
                 placement,
@@ -148,13 +144,13 @@
             popperInstance = undefined
         }
     })
-    run(() => {
+    $effect(() => {
         if (target) {
             unregisterEventListeners()
             registerEventListeners()
         }
     })
-    run(() => {
+    $effect(() => {
         if (targetEl) {
             if (isOpen) {
                 targetEl.setAttribute('aria-describedby', id)
@@ -163,7 +159,7 @@
             }
         }
     })
-    run(() => {
+    $effect(() => {
         if (popperPlacement === 'left') {
             bsPlacement = 'start'
         } else if (popperPlacement === 'right') {
@@ -172,32 +168,34 @@
             bsPlacement = popperPlacement
         }
     })
-    let classes = $derived(classnames(
-        className,
-        'tooltip',
-        `bs-tooltip-${bsPlacement}`,
-        animation ? 'fade' : false,
-        isOpen ? 'show' : false
-    ))
+    let classes = $derived(
+        classnames(
+            className,
+            'tooltip',
+            `bs-tooltip-${bsPlacement}`,
+            animation ? 'fade' : false,
+            isOpen ? 'show' : false,
+        ),
+    )
     let outer = $derived(container === 'inline' ? InlineContainer : Portal)
 </script>
 
 {#if isOpen}
-{@const SvelteComponent = outer}
-<SvelteComponent>
+    {@const SvelteComponent = outer}
+    <SvelteComponent>
     <div
-    bind:this={tooltipEl}
-    {...rest}
-    class={classes}
-    {id}
-    role="tooltip"
-    data-bs-theme={theme}
-    data-bs-delay={delay}
+        bind:this={tooltipEl}
+        {...rest}
+        class={classes}
+        {id}
+        role="tooltip"
+        data-bs-theme={theme}
+        data-bs-delay={delay}
     >
-    <div class="tooltip-arrow" data-popper-arrow></div>
-    <div class="tooltip-inner">
-        {@render children?.()}
+        <div class="tooltip-arrow" data-popper-arrow></div>
+        <div class="tooltip-inner">
+            {@render children?.()}
+        </div>
     </div>
-</div>
-</SvelteComponent>
+    </SvelteComponent>
 {/if}

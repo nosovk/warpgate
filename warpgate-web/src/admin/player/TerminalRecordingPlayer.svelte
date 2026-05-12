@@ -3,40 +3,60 @@
     import { onDestroy, onMount } from 'svelte'
     import { Terminal } from '@xterm/xterm'
     import { SerializeAddon } from '@xterm/addon-serialize'
-    import { faPlay, faPause, faExpand } from '@fortawesome/free-solid-svg-icons'
+    import {
+        faPlay,
+        faPause,
+        faExpand,
+    } from '@fortawesome/free-solid-svg-icons'
     import { Spinner } from '@sveltestrap/sveltestrap'
     import formatDuration from 'format-duration'
     import type { Recording } from 'admin/lib/api'
 
-    export let recording: Recording
+    interface Props {
+        recording: Recording
+    }
+
+    let { recording }: Props = $props()
 
     let url: string
-    let containerElement: HTMLDivElement
-    let rootElement: HTMLDivElement
-    let timestamp = 0
-    let seekInputValue = 0
-    let duration = 0
-    let resizeObserver: ResizeObserver|undefined
+    let containerElement: HTMLDivElement = $state()
+    let rootElement: HTMLDivElement = $state()
+    let timestamp = $state(0)
+    let seekInputValue = $state(0)
+    let duration = $state(0)
+    let resizeObserver: ResizeObserver | undefined
     let events: (DataEvent | SizeEvent | SnapshotEvent)[] = []
-    let playing = false
-    let loading = true
-    let sessionIsLive: boolean|null = null
-    let socket: WebSocket|null = null
-    let isStreaming = false
+    let playing = $state(false)
+    let loading = $state(true)
+    let sessionIsLive: boolean | null = $state(null)
+    let socket: WebSocket | null = null
+    let isStreaming = $derived(timestamp === duration && playing)
     let ptyMode = false
 
-    $: isStreaming = timestamp === duration && playing
-
     const COLOR_NAMES = [
-        'black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white',
-        'brightBlack', 'brightRed', 'brightGreen', 'brightYellow', 'brightBlue', 'brightMagenta', 'brightCyan', 'brightWhite',
+        'black',
+        'red',
+        'green',
+        'yellow',
+        'blue',
+        'magenta',
+        'cyan',
+        'white',
+        'brightBlack',
+        'brightRed',
+        'brightGreen',
+        'brightYellow',
+        'brightBlue',
+        'brightMagenta',
+        'brightCyan',
+        'brightWhite',
     ]
 
-    const theme: Record<string, string> = {
+    const theme: Record<string, string> = $state({
         foreground: '#ffcb83',
         background: '#262626',
         cursor: '#fc531d',
-    }
+    })
     const colors = [
         '#000000',
         '#c13900',
@@ -69,11 +89,11 @@
     type AsciiCastData = [number, 'o', string]
     type AsciiCastItem = AsciiCastData | AsciiCastHeader
 
-    function isAsciiCastHeader (data: AsciiCastItem): data is AsciiCastHeader {
+    function isAsciiCastHeader(data: AsciiCastItem): data is AsciiCastHeader {
         return 'version' in data
     }
 
-    function isAsciiCastData (data: AsciiCastItem): data is AsciiCastData {
+    function isAsciiCastData(data: AsciiCastItem): data is AsciiCastData {
         if (data instanceof Array) {
             return data[1] === 'o' || data[1] === 'e'
         } else {
@@ -81,9 +101,19 @@
         }
     }
 
-    interface SizeEvent { time: number, cols: number, rows: number }
-    interface DataEvent { time: number, data: string }
-    interface SnapshotEvent { time: number, snapshot: string }
+    interface SizeEvent {
+        time: number
+        cols: number
+        rows: number
+    }
+    interface DataEvent {
+        time: number
+        data: string
+    }
+    interface SnapshotEvent {
+        time: number
+        snapshot: string
+    }
 
     const term = new Terminal()
     const serializeAddon = new SerializeAddon()
@@ -107,45 +137,51 @@
         resizeObserver = new ResizeObserver(fitSize)
         resizeObserver.observe(containerElement)
 
-        const data = await fetch(url).then(r => r.text())
+        const data = await fetch(url).then((r) => r.text())
         for (const line of data.split('\n')) {
             addData(JSON.parse(line))
         }
 
         await seek(duration)
 
-        socket = new WebSocket(`wss://${location.host}/@warpgate/admin/api/recordings/${recording.id}/stream`)
+        socket = new WebSocket(
+            `wss://${location.host}/@warpgate/admin/api/recordings/${recording.id}/stream`,
+        )
         socket.addEventListener('message', function (event) {
             let message = JSON.parse(event.data)
             if ('data' in message) {
                 let item: AsciiCastItem = message.data
                 addData(item)
-            } if ('start' in message) {
+            }
+            if ('start' in message) {
                 sessionIsLive = message.live
                 if (!sessionIsLive) {
                     seek(0)
                 } else {
                     playing = true
                 }
-            } if ('end' in message) {
+            }
+            if ('end' in message) {
                 sessionIsLive = false
             } else {
                 console.log('Message from server ', message)
             }
         })
-        socket.addEventListener('close', () => console.info('Live stream closed'))
+        socket.addEventListener('close', () =>
+            console.info('Live stream closed'),
+        )
 
         loading = false
     })
 
-    async function writeToTerminal (data: string) {
+    async function writeToTerminal(data: string) {
         if (!ptyMode) {
             data = data.replace(/\n/g, '\r\n')
         }
-        await new Promise<void>(r => term.write(data, r))
+        await new Promise<void>((r) => term.write(data, r))
     }
 
-    function addData (data: AsciiCastItem) {
+    function addData(data: AsciiCastItem) {
         if (isAsciiCastHeader(data)) {
             if (data.width) {
                 ptyMode = true
@@ -176,25 +212,25 @@
     }
 
     let metricsCanvas: HTMLCanvasElement
-    function fitSize () {
+    function fitSize() {
         metricsCanvas ??= document.createElement('canvas')
         const context = metricsCanvas.getContext('2d')!
         context.font = `10px ${term.options.fontFamily ?? 'monospace'}`
         const metrics = context.measureText('abcdef')
 
         const fontWidth = containerElement.clientWidth / term.cols
-        term.options.fontSize = fontWidth / (metrics.width / 6) * 10
+        term.options.fontSize = (fontWidth / (metrics.width / 6)) * 10
     }
 
     let seekPromise = Promise.resolve()
 
-    async function seek (time: number) {
+    async function seek(time: number) {
         seekPromise = seekPromise.then(() => _seekInternal(time))
         await seekPromise
     }
 
-    async function _seekInternal (time: number) {
-        let nearestSnapshot: SnapshotEvent|null = null
+    async function _seekInternal(time: number) {
+        let nearestSnapshot: SnapshotEvent | null = null
 
         for (const event of events) {
             if (event.time > time) {
@@ -207,7 +243,7 @@
 
         let index = nearestSnapshot ? events.indexOf(nearestSnapshot) : 0
         if (time >= timestamp) {
-            const nextEventIndex = events.findIndex(e => e.time > timestamp)
+            const nextEventIndex = events.findIndex((e) => e.time > timestamp)
             if (nextEventIndex === -1) {
                 return
             }
@@ -226,7 +262,7 @@
 
         let output = ''
 
-        async function flush () {
+        async function flush() {
             await writeToTerminal(output)
             output = ''
         }
@@ -264,10 +300,10 @@
         await flush()
 
         timestamp = time
-        seekInputValue = 100 * time / duration
+        seekInputValue = (100 * time) / duration
     }
 
-    function resize (cols: number, rows: number) {
+    function resize(cols: number, rows: number) {
         if (term.cols === cols && term.rows === rows) {
             return
         }
@@ -280,9 +316,9 @@
     onDestroy(() => resizeObserver?.disconnect())
 
     let destroyed = false
-    onDestroy(() => destroyed = true)
+    onDestroy(() => (destroyed = true))
 
-    async function step () {
+    async function step() {
         if (destroyed) {
             return
         }
@@ -292,11 +328,11 @@
         setTimeout(step, 100)
     }
 
-    function togglePlaying () {
+    function togglePlaying() {
         playing = !playing
     }
 
-    function keyPressHandler (event: KeyboardEvent) {
+    function keyPressHandler(event: KeyboardEvent) {
         if (event.key === ' ') {
             togglePlaying()
         }
@@ -304,7 +340,7 @@
 
     step()
 
-    function toggleFullscreen () {
+    function toggleFullscreen() {
         if (document.fullscreenElement) {
             document.exitFullscreen()
         } else {
@@ -313,7 +349,11 @@
     }
 </script>
 
-<div class="root" bind:this={rootElement} style="background: {theme.background}">
+<div
+    class="root"
+    bind:this={rootElement}
+    style="background: {theme.background}"
+>
     {#if loading}
     <Spinner color="primary" />
     {/if}
@@ -324,145 +364,144 @@
     </div>
     {/if}
 
-    <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+    <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
     <div
-        class="container"
-        class:invisible={loading}
-        on:click={togglePlaying}
-        on:keypress={keyPressHandler}
-        role="img"
-        bind:this={containerElement}
+    class="container"
+    class:invisible={loading}
+    onclick={togglePlaying}
+    onkeypress={keyPressHandler}
+    role="img"
+    bind:this={containerElement}
     ></div>
 
     <div class="toolbar" class:invisible={loading}>
-        <button class="btn btn-link" on:click={togglePlaying}>
-            <Fa icon={playing ? faPause : faPlay} fw />
-        </button>
-        <pre
-            class="timestamp"
-        >{ formatDuration(timestamp * 1000, { leading: true }) }</pre>
-        {#if sessionIsLive === true}
-            <button
-                class="btn live-btn"
-                class:active={isStreaming}
-                on:click={() => seek(duration)}
-            >LIVE</button>
-        {/if}
-        <input
-            class="w-100"
-            type="range"
-            min="0" max="100" step="0.001"
-            style="background-size: {seekInputValue}% 100%;"
-            bind:value={seekInputValue}
-            on:input={() => seek(duration * seekInputValue / 100)} />
-        <button class="btn btn-link" on:click={toggleFullscreen}>
-            <Fa icon={faExpand} fw />
-        </button>
+    <button class="btn btn-link" onclick={togglePlaying}>
+        <Fa icon={playing ? faPause : faPlay} fw />
+    </button>
+    <pre class="timestamp">{formatDuration(timestamp * 1000, {
+        leading: true,
+    })}</pre>
+    {#if sessionIsLive === true}
+        <button
+            class="btn live-btn"
+            class:active={isStreaming}
+            onclick={() => seek(duration)}>LIVE</button
+        >
+    {/if}
+    <input
+        class="w-100"
+        type="range"
+        min="0"
+        max="100"
+        step="0.001"
+        style="background-size: {seekInputValue}% 100%;"
+        bind:value={seekInputValue}
+        oninput={() => seek((duration * seekInputValue) / 100)}
+    />
+    <button class="btn btn-link" onclick={toggleFullscreen}>
+        <Fa icon={faExpand} fw />
+    </button>
     </div>
 </div>
 
 <style lang="scss">
-    @import "../../../node_modules/@xterm/xterm/css/xterm.css";
-
+    @import "../../../node_modules/@xterm/xterm/css/xterm.css"
     .root {
-        border-radius: 5px;
-        overflow: hidden;
-        position: relative;
-        contain: content;
-        display: flex;
-        flex-direction: column;
+    border-radius: 5px
+    overflow: hidden
+    position: relative
+    contain: content
+    display: flex
+    flex-direction: column
     }
 
     .container {
-        padding: 5px;
-        margin: auto;
+    padding: 5px
+    margin: auto
     }
 
     .toolbar {
-        display: flex;
+    display: flex
     }
 
     :global(.xterm) {
-        cursor: pointer !important;
+    cursor: pointer !important
     }
 
     .btn {
-        color: #eee;
-
-        :global(svg) {
-            transition: all .25s ease-out;
-            &:hover {
-                transform: scale(1.2);
-            }
+    color: #eee
+    :global(svg) {
+        transition: all .25s ease-out
+        &:hover {
+            transform: scale(1.2)
         }
+    }
     }
 
     :global(.spinner-border), .pause-overlay {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        margin: -12px 0 0 -12px;
-        z-index: 1;
+    position: absolute
+    left: 50%
+    top: 50%
+    margin: -12px 0 0 -12px
+    z-index: 1
     }
 
     .pause-overlay {
-        width: 24px;
-        text-align: center;
-        color: white;
+    width: 24px
+    text-align: center
+    color: white
     }
 
     input[type="range"] {
-        appearance: none;
-        -webkit-appearance: none;
-        margin: 18px 10px 0;
-        height: 2px;
-        background: #ffffff99;
-        border-radius: 5px;
-        background: linear-gradient(#eee, #eee);
-        background-repeat: no-repeat;
-        cursor: pointer;
-
-        &:hover::-webkit-slider-thumb {
-            transform: scale(1.5);
-        }
+    appearance: none
+    -webkit-appearance: none
+    margin: 18px 10px 0
+    height: 2px
+    background: #ffffff99
+    border-radius: 5px
+    background: linear-gradient(#eee, #eee)
+    background-repeat: no-repeat
+    cursor: pointer
+    &:hover::-webkit-slider-thumb {
+        transform: scale(1.5)
+    }
     }
 
     input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        height: 10px;
-        width: 10px;
-        border-radius: 50%;
-        background: #eee;
-        transition: all .25s ease-out;
+    -webkit-appearance: none
+    height: 10px
+    width: 10px
+    border-radius: 50%
+    background: #eee
+    transition: all .25s ease-out
     }
 
     input[type=range]::-webkit-slider-runnable-track  {
-        -webkit-appearance: none;
-        box-shadow: none;
-        border: none;
-        background: transparent;
+    -webkit-appearance: none
+    box-shadow: none
+    border: none
+    background: transparent
     }
 
     .timestamp {
-        flex: none;
-        overflow: visible;
-        color: #eeeeee;
-        margin: 0;
-        font-size: 0.75rem;
-        align-self: center;
+    flex: none
+    overflow: visible
+    color: #eeeeee
+    margin: 0
+    font-size: 0.75rem
+    align-self: center
     }
 
     .live-btn {
-        font-size: 0.75rem;
-        align-self: center;
-        color: red;
-        flex: none;
-
-        &.active {
-            background: red;
-            color: white;
-            padding: 0.1rem 0.25rem;
-            margin: 0 0.5rem;
-        }
+    font-size: 0.75rem
+    align-self: center
+    color: red
+    flex: none
+    &.active {
+        background: red
+        color: white
+        padding: 0.1rem 0.25rem
+        margin: 0 0.5rem
+    }
     }
 </style>

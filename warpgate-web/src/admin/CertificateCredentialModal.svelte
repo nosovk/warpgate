@@ -18,7 +18,10 @@
     interface Props {
         isOpen: boolean
         username: string
-        save: (label: string, publicKeyPem: string) => Promise<IssuedCertificateCredential>
+        save: (
+            label: string,
+            publicKeyPem: string,
+        ) => Promise<IssuedCertificateCredential>
         onClose?: () => void
         storeInBrowserByDefault?: boolean
     }
@@ -53,18 +56,28 @@
                     namedCurve: 'P-384',
                 },
                 true,
-                ['sign', 'verify']
+                ['sign', 'verify'],
             )
 
             // Export private key as PKCS#8 PEM
-            const privateKeyArrayBuffer = await crypto.subtle.exportKey('pkcs8', keyPair.privateKey)
-            const privateKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(privateKeyArrayBuffer)))
+            const privateKeyArrayBuffer = await crypto.subtle.exportKey(
+                'pkcs8',
+                keyPair.privateKey,
+            )
+            const privateKeyBase64 = btoa(
+                String.fromCharCode(...new Uint8Array(privateKeyArrayBuffer)),
+            )
             const privateKeyLines = privateKeyBase64.match(/.{1,64}/g) || []
             privateKeyPem = `-----BEGIN PRIVATE KEY-----\n${privateKeyLines.join('\n')}\n-----END PRIVATE KEY-----`
 
             // Export public key as SPKI PEM
-            const publicKeyArrayBuffer = await crypto.subtle.exportKey('spki', keyPair.publicKey)
-            const publicKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(publicKeyArrayBuffer)))
+            const publicKeyArrayBuffer = await crypto.subtle.exportKey(
+                'spki',
+                keyPair.publicKey,
+            )
+            const publicKeyBase64 = btoa(
+                String.fromCharCode(...new Uint8Array(publicKeyArrayBuffer)),
+            )
             const publicKeyLines = publicKeyBase64.match(/.{1,64}/g) || []
             publicKeyPem = `-----BEGIN PUBLIC KEY-----\n${publicKeyLines.join('\n')}\n-----END PUBLIC KEY-----`
         } catch (error) {
@@ -129,7 +142,9 @@
         if (!privateKeyPem) {
             return
         }
-        const filename = label.trim() ? `${label.trim()}-private-key.pem` : 'private-key.pem'
+        const filename = label.trim()
+            ? `${label.trim()}-private-key.pem`
+            : 'private-key.pem'
         downloadBlob(privateKeyPem, filename)
     }
 
@@ -156,86 +171,83 @@
 
 <Modal {isOpen} toggle={close}>
     <ModalBody>
-        {#if generatedCertificatePem}
-            <div class="text-center mb-3">
-                <Fa icon={faCheck} class="m-auto" size="lg" />
-                <p>Certificate has been issued</p>
-            </div>
-            <Alert color="warning" fade={false} class="mb-3">
-                You must download the private key and the certificate now - you won't be able to access them later.
-            </Alert>
-        {:else}
-            <FormGroup floating label="Certificate label">
-                <Input
-                    bind:value={label}
-                    disabled={saving}
+    {#if generatedCertificatePem}
+        <div class="text-center mb-3">
+            <Fa icon={faCheck} class="m-auto" size="lg" />
+            <p>Certificate has been issued</p>
+        </div>
+        <Alert color="warning" fade={false} class="mb-3">
+            You must download the private key and the certificate now - you
+            won't be able to access them later.
+        </Alert>
+    {:else}
+        <FormGroup floating label="Certificate label">
+            <Input bind:value={label} disabled={saving} />
+        </FormGroup>
+
+        <div class="text-muted d-flex align-items-center">
+            <Fa icon={faInfoCircle} class="me-3" />
+            <small>
+                A private key will be generated locally in your browser.
+                <br />
+                You'll need to save it after the certificate is issued.
+            </small>
+        </div>
+
+        <div class="mt-4">
+            <div class="form-check form-switch">
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="storeCertInBrowser"
+                    bind:checked={storeInBrowser}
                 />
-            </FormGroup>
-
-            <div class="text-muted d-flex align-items-center">
-                <Fa icon={faInfoCircle} class="me-3" />
-                <small>
-                    A private key will be generated locally in your browser.
-                    <br/>
-                    You'll need to save it after the certificate is issued.
-                </small>
+                <label class="form-check-label" for="storeCertInBrowser">
+                    Store certificate and private key in this browser for
+                    kubeconfig generation
+                </label>
             </div>
-
-            <div class="mt-4">
-                <div class="form-check form-switch">
-                    <input
-                        class="form-check-input"
-                        type="checkbox"
-                        id="storeCertInBrowser"
-                        bind:checked={storeInBrowser}
-                    />
-                    <label class="form-check-label" for="storeCertInBrowser">
-                        Store certificate and private key in this browser for kubeconfig generation
-                    </label>
-                </div>
-            </div>
-        {/if}
+        </div>
+    {/if}
     </ModalBody>
     <ModalFooter>
-        {#if !generatedCertificatePem}
-            <AsyncButton
-                color="primary"
-                class="modal-button"
-                disabled={saving || !label.trim()}
-                click={_generate}
-            >
-                Issue certificate
-            </AsyncButton>
-        {:else}
-            <Button
-                color="primary"
-                class="d-block w-100"
-                on:click={downloadCertificate}
-            >
-                Save certificate
-            </Button>
-        {/if}
-        {#if privateKeyPem}
-            <Button
-                color="primary"
-                class="d-block w-100"
-                on:click={downloadPrivateKey}
-            >
-                Save private key
-            </Button>
-        {/if}
-        {#if generatedKubeConfig}
-            <CopyButton
-                color="secondary"
-                class="d-flex align-items-center justify-content-center w-100"
-                text={generatedKubeConfig}
-                label="Copy both as kubeconfig"
-                />
-        {/if}
-        <Button
-            color="danger"
-            on:click={close}
+    {#if !generatedCertificatePem}
+        <AsyncButton
+            color="primary"
             class="modal-button"
-        >Close</Button>
+            disabled={saving || !label.trim()}
+            click={_generate}
+        >
+            Issue certificate
+        </AsyncButton>
+    {:else}
+        <Button
+            color="primary"
+            class="d-block w-100"
+            on:click={downloadCertificate}
+        >
+            Save certificate
+        </Button>
+    {/if}
+    {#if privateKeyPem}
+        <Button
+            color="primary"
+            class="d-block w-100"
+            on:click={downloadPrivateKey}
+        >
+            Save private key
+        </Button>
+    {/if}
+    {#if generatedKubeConfig}
+        <CopyButton
+            color="secondary"
+            class="d-flex align-items-center justify-content-center w-100"
+            text={generatedKubeConfig}
+            label="Copy both as kubeconfig"
+        />
+    {/if}
+    <Button color="danger" on:click={close} class="modal-button"
+        >Close</Button
+    >
     </ModalFooter>
 </Modal>

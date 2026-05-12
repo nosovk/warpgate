@@ -15,14 +15,16 @@
     let lastCreatedSecret: string | undefined = $state()
     const now = Date.now()
 
-    async function deleteToken (token: ExistingApiToken) {
-        tokens = tokens.filter(c => c.id !== token.id)
+    async function deleteToken(token: ExistingApiToken) {
+        tokens = tokens.filter((c) => c.id !== token.id)
         await api.deleteMyApiToken(token)
         lastCreatedSecret = undefined
     }
 
-    async function createToken (label: string, expiry: Date) {
-        const { secret, token } = await api.createApiToken({ newApiToken : { label, expiry } })
+    async function createToken(label: string, expiry: Date) {
+        const { secret, token } = await api.createApiToken({
+            newApiToken: { label, expiry },
+        })
         lastCreatedSecret = secret
         tokens = [...tokens, token]
     }
@@ -30,45 +32,51 @@
 
 <div class="page-summary-bar mt-4">
     <h1>API tokens</h1>
-    <Button color="primary" class="ms-auto" onclick={e => {
+    <Button
+    color="primary"
+    class="ms-auto"
+    onclick={(e) => {
         creatingToken = true
         e.preventDefault()
-    }}>Create token</Button>
+    }}>Create token</Button
+    >
 </div>
 
 {#if lastCreatedSecret}
-<Alert color="info">
+    <Alert color="info">
     <div>Your token - shown only once:</div>
     <div class="d-flex align-items-center mt-2">
         <code style="min-width: 0">{lastCreatedSecret}</code>
         <CopyButton class="ms-auto" text={lastCreatedSecret} />
     </div>
-</Alert>
+    </Alert>
 {/if}
 
 <Loadable promise={api.getMyApiTokens()} bind:data={tokens}>
     {#if tokens.length === 0}
-        <EmptyState
-            title="No tokens yet"
-            hint="Tokens let you manage Warpgate programmatically via its API"
-        />
+    <EmptyState
+        title="No tokens yet"
+        hint="Tokens let you manage Warpgate programmatically via its API"
+    />
     {/if}
 
     <div class="list-group list-group-flush mb-3">
-        {#each tokens as token (token.id)}
+    {#each tokens as token (token.id)}
         <div class="list-group-item d-flex align-items-center pr-0">
             <Fa fw icon={faKey} />
             <span class="label ms-3">{token.label}</span>
             {#if token.expiry.getTime() < now}
                 <Badge color="danger" class="ms-2">Expired</Badge>
             {:else}
-                <Badge color="success" class="ms-2">{token.expiry.toLocaleDateString()}</Badge>
+                <Badge color="success" class="ms-2"
+                    >{token.expiry.toLocaleDateString()}</Badge
+                >
             {/if}
             <span class="ms-auto"></span>
             <Button
                 color="link"
                 class="ms-2"
-                onclick={e => {
+                onclick={(e) => {
                     deleteToken(token)
                     e.preventDefault()
                 }}
@@ -76,13 +84,10 @@
                 Delete
             </Button>
         </div>
-        {/each}
+    {/each}
     </div>
 </Loadable>
 
 {#if creatingToken}
-<CreateApiTokenModal
-    bind:isOpen={creatingToken}
-    create={createToken}
-/>
+    <CreateApiTokenModal bind:isOpen={creatingToken} create={createToken} />
 {/if}

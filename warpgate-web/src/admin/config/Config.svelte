@@ -5,10 +5,12 @@
 
     const routes = {
         '/targets/create/:kind': wrap({
-            asyncComponent: () => import('./targets/CreateTarget.svelte') as any,
+            asyncComponent: () =>
+                import('./targets/CreateTarget.svelte') as any,
         }),
         '/targets/create': wrap({
-            asyncComponent: () => import('./targets/ChooseTargetKind.svelte') as any,
+            asyncComponent: () =>
+                import('./targets/ChooseTargetKind.svelte') as any,
         }),
         '/targets/:id': wrap({
             asyncComponent: () => import('./targets/Target.svelte') as any,
@@ -59,22 +61,27 @@
             asyncComponent: () => import('./ldap/LdapServers.svelte') as any,
         }),
         '/ldap-servers/create': wrap({
-            asyncComponent: () => import('./ldap/CreateLdapServer.svelte') as any,
+            asyncComponent: () =>
+                import('./ldap/CreateLdapServer.svelte') as any,
         }),
         '/ldap-servers/:id': wrap({
             asyncComponent: () => import('./ldap/LdapServer.svelte') as any,
         }),
         '/ldap-servers/:id/users': wrap({
-            asyncComponent: () => import('./ldap/LdapUserBrowser.svelte') as any,
+            asyncComponent: () =>
+                import('./ldap/LdapUserBrowser.svelte') as any,
         }),
         '/target-groups/create': wrap({
-            asyncComponent: () => import('./target-groups/CreateTargetGroup.svelte') as any,
+            asyncComponent: () =>
+                import('./target-groups/CreateTargetGroup.svelte') as any,
         }),
         '/target-groups/:id': wrap({
-            asyncComponent: () => import('./target-groups/TargetGroup.svelte') as any,
+            asyncComponent: () =>
+                import('./target-groups/TargetGroup.svelte') as any,
         }),
         '/target-groups': wrap({
-            asyncComponent: () => import('./target-groups/TargetGroups.svelte') as any,
+            asyncComponent: () =>
+                import('./target-groups/TargetGroups.svelte') as any,
         }),
     }
 
@@ -83,88 +90,92 @@
 
 {#snippet navItems()}
     <NavListItem
-        class="mb-2"
-        title="Targets"
-        description="Destinations for users to connect to"
-        href="/config/targets"
-        small={sidebarMode}
+    class="mb-2"
+    title="Targets"
+    description="Destinations for users to connect to"
+    href="/config/targets"
+    small={sidebarMode}
     />
 
     <NavListItem
-        class="mb-2"
-        title="Target groups"
-        description="Organize targets into groups"
-        href="/config/target-groups"
-        small={sidebarMode}
+    class="mb-2"
+    title="Target groups"
+    description="Organize targets into groups"
+    href="/config/target-groups"
+    small={sidebarMode}
     />
 
     <NavListItem
-        class="mb-2"
-        title="Users"
-        description="Manage accounts and credentials"
-        href="/config/users"
-        small={sidebarMode}
+    class="mb-2"
+    title="Users"
+    description="Manage accounts and credentials"
+    href="/config/users"
+    small={sidebarMode}
     />
 
     <NavListItem
-        class="mb-2"
-        title="Roles"
-        description="Group users together"
-        href="/config/access-roles"
-        small={sidebarMode}
+    class="mb-2"
+    title="Roles"
+    description="Group users together"
+    href="/config/access-roles"
+    small={sidebarMode}
     />
 
     <NavListItem
-        class="mb-2"
-        title="Admin roles"
-        description="Permissions for administrators"
-        href="/config/admin-roles"
-        small={sidebarMode}
+    class="mb-2"
+    title="Admin roles"
+    description="Permissions for administrators"
+    href="/config/admin-roles"
+    small={sidebarMode}
     />
 
     <NavListItem
-        class="mb-2"
-        title="Tickets"
-        description="Temporary access credentials"
-        href="/config/tickets"
-        small={sidebarMode}
+    class="mb-2"
+    title="Tickets"
+    description="Temporary access credentials"
+    href="/config/tickets"
+    small={sidebarMode}
     />
 
     <NavListItem
-        class="mb-2"
-        title="SSH keys"
-        description="Own keys and known hosts"
-        href="/config/ssh"
-        small={sidebarMode}
+    class="mb-2"
+    title="SSH keys"
+    description="Own keys and known hosts"
+    href="/config/ssh"
+    small={sidebarMode}
     />
 
     <NavListItem
-        class="mb-2"
-        title="LDAP servers"
-        description="Connect to directory services"
-        href="/config/ldap-servers"
-        small={sidebarMode}
+    class="mb-2"
+    title="LDAP servers"
+    description="Connect to directory services"
+    href="/config/ldap-servers"
+    small={sidebarMode}
     />
 
     <NavListItem
-        class="mb-2"
-        title="Global parameters"
-        description="Change instance-wide settings"
-        href="/config/parameters"
-        small={sidebarMode}
+    class="mb-2"
+    title="Global parameters"
+    description="Change instance-wide settings"
+    href="/config/parameters"
+    small={sidebarMode}
     />
 {/snippet}
 
 <div class="wrapper" class:d-none={!sidebarMode}>
     <div class="sidebar">
-        <!-- eslint-disable-next-line @typescript-eslint/no-confusing-void-expression -->
-        {@render navItems()}
+    <!-- eslint-disable-next-line @typescript-eslint/no-confusing-void-expression -->
+    {@render navItems()}
     </div>
 
     <div class="main">
-        <Router {routes} prefix="/config" on:routeLoading={e => {
+    <Router
+        {routes}
+        prefix="/config"
+        on:routeLoading={(e) => {
             sidebarMode = e.detail.route !== ''
-        }} />
+        }}
+    />
     </div>
 </div>
 
@@ -174,26 +185,24 @@
 </div>
 
 <style lang="scss">
-    $sb-w: 200px;
-    $sb-m: 30px;
-
+    $sb-w: 200px
+    $sb-m: 30px
     .wrapper {
-        display: flex;
-        gap: $sb-m;
+    display: flex
+    gap: $sb-m
+    > .sidebar {
+        width: $sb-w
+        flex: none
+    }
 
-        > .sidebar {
-            width: $sb-w;
-            flex: none;
-        }
-
-        > .main {
-            flex: 1 0 0;
-        }
+    > .main {
+        flex: 1 0 0
+    }
     }
 
     @media (max-width: #{720px + $sb-m + $sb-w}) {
-        .sidebar {
-            display: none;
-        }
+    .sidebar {
+        display: none
+    }
     }
 </style>

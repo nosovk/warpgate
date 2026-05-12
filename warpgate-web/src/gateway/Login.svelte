@@ -4,29 +4,43 @@
     import { Button, FormGroup } from '@sveltestrap/sveltestrap'
     import Fa from 'svelte-fa'
     import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
-    import { faGoogle, faMicrosoft, faApple } from '@fortawesome/free-brands-svg-icons'
+    import {
+        faGoogle,
+        faMicrosoft,
+        faApple,
+    } from '@fortawesome/free-brands-svg-icons'
 
-    import { api, ApiAuthState, LoginFailureResponseFromJSON, type SsoProviderDescription, SsoProviderKind, ResponseError } from 'gateway/lib/api'
+    import {
+        api,
+        ApiAuthState,
+        LoginFailureResponseFromJSON,
+        type SsoProviderDescription,
+        SsoProviderKind,
+        ResponseError,
+    } from 'gateway/lib/api'
     import { reloadServerInfo, serverInfo } from 'gateway/lib/store'
     import { stringifyError } from 'common/errors'
     import Alert from 'common/sveltestrap-s5-ports/Alert.svelte'
     import Loadable from 'common/Loadable.svelte'
 
-    let error: string|null = $state(null)
+    let error: string | null = $state(null)
     let username = $state('')
     let password = $state('')
     let otp = $state('')
     let busy = $state(false)
-    let otpInput: HTMLInputElement|undefined = $state()
-    let authState: ApiAuthState|undefined = $state()
+    let otpInput: HTMLInputElement | undefined = $state()
+    let authState: ApiAuthState | undefined = $state()
     let ssoProvidersPromise = api.getSsoProviders()
     let showPasswordLogin = $state(false)
 
-    const nextURL = new URLSearchParams(get(querystring)).get('next') ?? undefined
-    const serverErrorMessage = new URLSearchParams(location.search).get('login_error')
+    const nextURL =
+        new URLSearchParams(get(querystring)).get('next') ?? undefined
+    const serverErrorMessage = new URLSearchParams(location.search).get(
+        'login_error',
+    )
     const initPromise = init()
 
-    async function init () {
+    async function init() {
         try {
             authState = (await api.getDefaultAuthState()).state
         } catch (err) {
@@ -41,7 +55,7 @@
         continueWithState()
     }
 
-    function success () {
+    function success() {
         if (nextURL) {
             location.assign(nextURL)
         } else {
@@ -49,14 +63,14 @@
         }
     }
 
-    async function continueWithState () {
+    async function continueWithState() {
         if (authState === ApiAuthState.Success) {
             success()
         }
         if (authState === ApiAuthState.SsoNeeded) {
             const providers = await ssoProvidersPromise
             if (!providers.length) {
-                // todo
+            // todo
             }
             if (providers.length === 1) {
                 startSSO(providers[0]!)
@@ -69,7 +83,7 @@
         }
     }
 
-    async function login () {
+    async function login() {
         busy = true
         try {
             await _login()
@@ -78,7 +92,7 @@
         }
     }
 
-    async function _login () {
+    async function _login() {
         error = null
         try {
             if (authState === ApiAuthState.OtpNeeded) {
@@ -100,7 +114,9 @@
         } catch (err) {
             if (err instanceof ResponseError) {
                 if (err.response.status === 401) {
-                    const failure = LoginFailureResponseFromJSON(await err.response.json())
+                    const failure = LoginFailureResponseFromJSON(
+                        await err.response.json(),
+                    )
                     authState = failure.state
 
                     continueWithState()
@@ -113,12 +129,12 @@
         }
     }
 
-    async function cancel () {
+    async function cancel() {
         await api.cancelDefaultAuth()
         location.reload()
     }
 
-    async function startSSO (provider: SsoProviderDescription) {
+    async function startSSO(provider: SsoProviderDescription) {
         busy = true
         try {
             const p = await api.startSso({ name: provider.name, next: nextURL })
@@ -131,175 +147,182 @@
 </script>
 
 {#snippet localLoginForm()}
-    <form autocomplete="on" onsubmit={e => {
+    <form
+    autocomplete="on"
+    onsubmit={(e) => {
         login()
         e.preventDefault()
-    }}>
-        <FormGroup floating label="Username">
-            <!-- svelte-ignore a11y_autofocus -->
-            <input
-                bind:value={username}
-                name="username"
-                autocomplete="username"
-                disabled={busy}
-                class="form-control"
-                required
-                autofocus />
-        </FormGroup>
-
-        <FormGroup floating label="Password">
-            <input
-                bind:value={password}
-                name="password"
-                type="password"
-                autocomplete="current-password"
-                disabled={busy}
-                required
-                class="form-control" />
-        </FormGroup>
-
-        <Button
-            class="d-flex align-items-center"
-            color="primary"
-            type="submit"
+    }}
+    >
+    <FormGroup floating label="Username">
+        <!-- svelte-ignore a11y_autofocus -->
+        <input
+            bind:value={username}
+            name="username"
+            autocomplete="username"
             disabled={busy}
-        >
-            Login
-            <Fa class="ms-2" fw icon={faArrowRight} />
-        </Button>
+            class="form-control"
+            required
+            autofocus
+        />
+    </FormGroup>
+
+    <FormGroup floating label="Password">
+        <input
+            bind:value={password}
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            disabled={busy}
+            required
+            class="form-control"
+        />
+    </FormGroup>
+
+    <Button
+        class="d-flex align-items-center"
+        color="primary"
+        type="submit"
+        disabled={busy}
+    >
+        Login
+        <Fa class="ms-2" fw icon={faArrowRight} />
+    </Button>
     </form>
 {/snippet}
 
 <Loadable promise={initPromise}>
-
     <div class="mt-5">
-        <div class="page-summary-bar">
-            {#if authState === ApiAuthState.NotStarted || authState === ApiAuthState.Failed || authState === ApiAuthState.IpRejected}
-                <h1>Welcome</h1>
-            {:else}
-                <h1>Continue login</h1>
-            {/if}
-        </div>
-        {#if authState === ApiAuthState.OtpNeeded}
-            <form class="d-flex align-items-stretch gap-2" onsubmit={e => {
+    <div class="page-summary-bar">
+        {#if authState === ApiAuthState.NotStarted || authState === ApiAuthState.Failed || authState === ApiAuthState.IpRejected}
+            <h1>Welcome</h1>
+        {:else}
+            <h1>Continue login</h1>
+        {/if}
+    </div>
+    {#if authState === ApiAuthState.OtpNeeded}
+        <form
+            class="d-flex align-items-stretch gap-2"
+            onsubmit={(e) => {
                 login()
                 e.preventDefault()
-            }}>
-                <FormGroup floating label="One-time password" class="w-100">
-                    <!-- svelte-ignore a11y_autofocus -->
-                    <input
-                        bind:value={otp}
-                        bind:this={otpInput}
-                        name="otp"
-                        required
-                        pattern="\d&lbrace;6,8&rbrace;"
-                        autofocus
-                        inputmode="numeric"
-                        disabled={busy}
-                        class="form-control" />
-                </FormGroup>
-
-                <Button
-                class="mb-3"
-                    color="primary"
-                    type="submit"
+            }}
+        >
+            <FormGroup floating label="One-time password" class="w-100">
+                <!-- svelte-ignore a11y_autofocus -->
+                <input
+                    bind:value={otp}
+                    bind:this={otpInput}
+                    name="otp"
+                    required
+                    pattern="\d&lbrace;6,8&rbrace;"
+                    autofocus
+                    inputmode="numeric"
                     disabled={busy}
-                >
-                    <Fa icon={faArrowRight} />
-                </Button>
-            </form>
-        {/if}
-        {#if (authState === ApiAuthState.NotStarted || authState === ApiAuthState.PasswordNeeded || authState === ApiAuthState.Failed || authState === ApiAuthState.IpRejected) && (!$serverInfo?.minimizePasswordLogin || showPasswordLogin)}
-            <!-- eslint-disable-next-line @typescript-eslint/no-confusing-void-expression -->
-            {@render localLoginForm()}
-        {/if}
+                    class="form-control"
+                />
+            </FormGroup>
 
-        <div class="mt-3"></div>
+            <Button
+                class="mb-3"
+                color="primary"
+                type="submit"
+                disabled={busy}
+            >
+                <Fa icon={faArrowRight} />
+            </Button>
+        </form>
+    {/if}
+    {#if (authState === ApiAuthState.NotStarted || authState === ApiAuthState.PasswordNeeded || authState === ApiAuthState.Failed || authState === ApiAuthState.IpRejected) && (!$serverInfo?.minimizePasswordLogin || showPasswordLogin)}
+        <!-- eslint-disable-next-line @typescript-eslint/no-confusing-void-expression -->
+        {@render localLoginForm()}
+    {/if}
 
-        {#if authState === ApiAuthState.Failed}
-            <Alert color="danger">Incorrect credentials</Alert>
-        {/if}
-        {#if authState === ApiAuthState.IpRejected}
-            <Alert color="danger">Login denied: your IP address is not in the allowed range for this user</Alert>
-        {/if}
-        {#if serverErrorMessage}
-            <Alert color="danger">{serverErrorMessage}</Alert>
-        {/if}
-        {#if error}
-            <Alert color="danger">{error}</Alert>
-        {/if}
+    <div class="mt-3"></div>
+
+    {#if authState === ApiAuthState.Failed}
+        <Alert color="danger">Incorrect credentials</Alert>
+    {/if}
+    {#if authState === ApiAuthState.IpRejected}
+        <Alert color="danger"
+            >Login denied: your IP address is not in the allowed range for
+            this user</Alert
+        >
+    {/if}
+    {#if serverErrorMessage}
+        <Alert color="danger">{serverErrorMessage}</Alert>
+    {/if}
+    {#if error}
+        <Alert color="danger">{error}</Alert>
+    {/if}
     </div>
 
     {#if authState === ApiAuthState.SsoNeeded || authState === ApiAuthState.NotStarted || authState === ApiAuthState.Failed || authState === ApiAuthState.IpRejected}
-        <Loadable promise={ssoProvidersPromise}>
-            {#snippet children(ssoProviders)}
-                <div class="mt-3 sso-buttons">
-                    {#each ssoProviders as ssoProvider (ssoProvider.name)}
-                        <button
-                            class="btn btn-secondary"
-                            disabled={busy}
-                            onclick={() => startSSO(ssoProvider)}
-                        >
-                            {#if ssoProvider.kind === SsoProviderKind.Google}
-                                <Fa fw class="me-2" icon={faGoogle} />
-                            {/if}
-                            {#if ssoProvider.kind === SsoProviderKind.Azure}
-                                <Fa fw class="me-2" icon={faMicrosoft} />
-                            {/if}
-                            {#if ssoProvider.kind === SsoProviderKind.Apple}
-                                <Fa fw class="me-2" icon={faApple} />
-                            {/if}
-                            {ssoProvider.label || ssoProvider.name}
-                        </button>
-                    {/each}
-                </div>
-            {/snippet}
-        </Loadable>
+    <Loadable promise={ssoProvidersPromise}>
+        {#snippet children(ssoProviders)}
+            <div class="mt-3 sso-buttons">
+                {#each ssoProviders as ssoProvider (ssoProvider.name)}
+                    <button
+                        class="btn btn-secondary"
+                        disabled={busy}
+                        onclick={() => startSSO(ssoProvider)}
+                    >
+                        {#if ssoProvider.kind === SsoProviderKind.Google}
+                              <Fa fw class="me-2" icon={faGoogle} />
+                        {/if}
+                        {#if ssoProvider.kind === SsoProviderKind.Azure}
+                              <Fa fw class="me-2" icon={faMicrosoft} />
+                        {/if}
+                        {#if ssoProvider.kind === SsoProviderKind.Apple}
+                              <Fa fw class="me-2" icon={faApple} />
+                        {/if}
+                        {ssoProvider.label || ssoProvider.name}
+                    </button>
+                {/each}
+            </div>
+        {/snippet}
+    </Loadable>
     {/if}
 
     {#if (authState === ApiAuthState.NotStarted || authState === ApiAuthState.PasswordNeeded || authState === ApiAuthState.Failed || authState === ApiAuthState.IpRejected) && $serverInfo?.minimizePasswordLogin && !showPasswordLogin}
-        <div class="mt-3 text-center">
-            <!-- svelte-ignore a11y_invalid_attribute -->
-            <a
-                href="#"
-                class="password-login-link"
-                onclick={e => {
-                    e.preventDefault()
-                    showPasswordLogin = true
-                }}
-            >
-                Password login
-            </a>
-        </div>
+    <div class="mt-3 text-center">
+        <!-- svelte-ignore a11y_invalid_attribute -->
+        <a
+            href="#"
+            class="password-login-link"
+            onclick={(e) => {
+                e.preventDefault()
+                showPasswordLogin = true
+            }}
+        >
+            Password login
+        </a>
+    </div>
     {/if}
 
     {#if authState !== ApiAuthState.NotStarted && authState !== ApiAuthState.Failed && authState !== ApiAuthState.IpRejected}
-        <button
-            class="btn w-100 mt-3 btn-secondary"
-            onclick={cancel}
-        >
-            Cancel
-        </button>
+    <button class="btn w-100 mt-3 btn-secondary" onclick={cancel}>
+        Cancel
+    </button>
     {/if}
 </Loadable>
 
 <style lang="scss">
     h1 {
-        font-size: 3rem;
+    font-size: 3rem
     }
 
     .sso-buttons {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.85rem 1rem;
-
-        button {
-            flex: 1 0 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-wrap: nowrap;
-        }
+    display: flex
+    flex-wrap: wrap
+    gap: 0.85rem 1rem
+    button {
+        flex: 1 0 0
+        display: flex
+        align-items: center
+        justify-content: center
+        text-wrap: nowrap
+    }
     }
 
 

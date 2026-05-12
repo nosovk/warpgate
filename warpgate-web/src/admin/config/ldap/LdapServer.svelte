@@ -1,6 +1,13 @@
 <script lang="ts">
     import { push } from 'svelte-spa-router'
-    import { api, LdapUsernameAttribute, stringifyError, TlsMode, type LdapServerResponse, type Tls } from 'admin/lib/api'
+    import {
+        api,
+        LdapUsernameAttribute,
+        stringifyError,
+        TlsMode,
+        type LdapServerResponse,
+        type Tls,
+    } from 'admin/lib/api'
     import AsyncButton from 'common/AsyncButton.svelte'
     import Loadable from 'common/Loadable.svelte'
     import { FormGroup, Input } from '@sveltestrap/sveltestrap'
@@ -29,7 +36,9 @@
     let enabled = $state(true)
     let autoLinkSsoUsers = $state(false)
     let description = $state('')
-    let usernameAttribute = $state<LdapUsernameAttribute>(LdapUsernameAttribute.Cn)
+    let usernameAttribute = $state<LdapUsernameAttribute>(
+        LdapUsernameAttribute.Cn,
+    )
     let sshKeyAttribute = $state('sshPublicKey')
     let uuidAttribute = $state('')
     let error = $state<string | null>(null)
@@ -128,7 +137,7 @@
         }
     }
 
-    async function importUsers () {
+    async function importUsers() {
         await save()
         push(`/config/ldap-servers/${params.id}/users`)
     }
@@ -136,112 +145,131 @@
 
 <Loadable promise={load()}>
     <div class="container-max-md">
-        <div class="page-summary-bar">
-            <div>
-                <h1>{name}</h1>
-                <div class="text-muted">LDAP server</div>
+    <div class="page-summary-bar">
+        <div>
+            <h1>{name}</h1>
+            <div class="text-muted">LDAP server</div>
+        </div>
+    </div>
+
+    <form
+        onsubmit={(e) => {
+            e.preventDefault()
+            save()
+        }}
+    >
+        <FormGroup floating label="Name">
+            <Input bind:value={name} required />
+        </FormGroup>
+
+        <FormGroup floating label="Description">
+            <Input bind:value={description} />
+        </FormGroup>
+
+        <LdapConnectionFields
+            bind:host
+            bind:port
+            bind:bindDn
+            bind:bindPassword
+            bind:tls
+            bind:userFilter
+            bind:usernameAttribute
+            bind:sshKeyAttribute
+            bind:uuidAttribute
+            passwordPlaceholder="Keep current password"
+            passwordRequired={false}
+        />
+
+        {#if baseDns.length > 0}
+            <div class="mt-4">
+                <!-- svelte-ignore a11y_label_has_associated_control -->
+                <label class="form-label">Base DNs (discovered)</label>
+                <ul class="list-group">
+                    {#each baseDns as dn (dn)}
+                        <li class="list-group-item">
+                              <code>{dn}</code>
+                        </li>
+                    {/each}
+                </ul>
+            </div>
+        {/if}
+
+        <!-- <div class="mt-4">
+            <div class="form-check form-switch">
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="enabled"
+                    bind:checked={enabled}
+                />
+                <label class="form-check-label" for="enabled">
+                    Enabled
+                </label>
+            </div>
+        </div> -->
+
+        <div class="mt-4">
+            <div class="form-check form-switch">
+                <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="autoLinkSsoUsers"
+                    bind:checked={autoLinkSsoUsers}
+                />
+                <label class="form-check-label" for="autoLinkSsoUsers">
+                    Auto-link SSO users
+                </label>
+            </div>
+            <div class="form-text">
+                Automatically link SSO users to their LDAP accounts when
+                they log in
             </div>
         </div>
 
-        <form onsubmit={(e) => { e.preventDefault(); save() }}>
-            <FormGroup floating label="Name">
-                <Input bind:value={name} required />
-            </FormGroup>
-
-            <FormGroup floating label="Description">
-                <Input bind:value={description} />
-            </FormGroup>
-
-            <LdapConnectionFields
-                bind:host
-                bind:port
-                bind:bindDn
-                bind:bindPassword
-                bind:tls
-                bind:userFilter
-                bind:usernameAttribute
-                bind:sshKeyAttribute
-                bind:uuidAttribute
-                passwordPlaceholder="Keep current password"
-                passwordRequired={false}
-            />
-
-            {#if baseDns.length > 0}
-                <div class="mt-4">
-                    <!-- svelte-ignore a11y_label_has_associated_control -->
-                    <label class="form-label">Base DNs (discovered)</label>
-                    <ul class="list-group">
-                        {#each baseDns as dn (dn)}
-                            <li class="list-group-item">
-                                <code>{dn}</code>
-                            </li>
-                        {/each}
-                    </ul>
-                </div>
-            {/if}
-
-            <!-- <div class="mt-4">
-                <div class="form-check form-switch">
-                    <input
-                        class="form-check-input"
-                        type="checkbox"
-                        id="enabled"
-                        bind:checked={enabled}
-                    />
-                    <label class="form-check-label" for="enabled">
-                        Enabled
-                    </label>
-                </div>
-            </div> -->
-
-            <div class="mt-4">
-                <div class="form-check form-switch">
-                    <input
-                        class="form-check-input"
-                        type="checkbox"
-                        id="autoLinkSsoUsers"
-                        bind:checked={autoLinkSsoUsers}
-                    />
-                    <label class="form-check-label" for="autoLinkSsoUsers">
-                        Auto-link SSO users
-                    </label>
-                </div>
-                <div class="form-text">
-                    Automatically link SSO users to their LDAP accounts when they log in
-                </div>
+        {#if testResult}
+            <div
+                class="alert {testResult.success
+                    ? 'alert-success'
+                    : 'alert-danger'}"
+                role="alert"
+            >
+                {testResult.message}
             </div>
+        {/if}
 
-            {#if testResult}
-                <div class="alert {testResult.success ? 'alert-success' : 'alert-danger'}" role="alert">
-                    {testResult.message}
-                </div>
-            {/if}
-
-            {#if error}
-                <div class="alert alert-danger mt-3" role="alert">
-                    {error}
-                </div>
-            {/if}
-
-            <div class="d-flex gap-2 mt-5">
-                <AsyncButton type="button" class="btn btn-secondary" click={testConnection}>
-                    Test Connection
-                </AsyncButton>
-                <AsyncButton
-                    type="button"
-                    class="btn btn-info"
-                    click={importUsers}
-                >
-                    Import users
-                </AsyncButton>
-                <div class="me-auto"></div>
-                <AsyncButton type="button" class="btn btn-primary" click={save}>
-                    Save
-                </AsyncButton>
-                <AsyncButton type="button" class="btn btn-danger" click={remove}>
-                    Remove
-                </AsyncButton>
+        {#if error}
+            <div class="alert alert-danger mt-3" role="alert">
+                {error}
             </div>
-        </form>
+        {/if}
+
+        <div class="d-flex gap-2 mt-5">
+            <AsyncButton
+                type="button"
+                class="btn btn-secondary"
+                click={testConnection}
+            >
+                Test Connection
+            </AsyncButton>
+            <AsyncButton
+                type="button"
+                class="btn btn-info"
+                click={importUsers}
+            >
+                Import users
+            </AsyncButton>
+            <div class="me-auto"></div>
+            <AsyncButton type="button" class="btn btn-primary" click={save}>
+                Save
+            </AsyncButton>
+            <AsyncButton
+                type="button"
+                class="btn btn-danger"
+                click={remove}
+            >
+                Remove
+            </AsyncButton>
+        </div>
+    </form>
     </div>
 </Loadable>

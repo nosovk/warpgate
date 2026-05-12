@@ -11,7 +11,7 @@
     import { adminPermissions } from 'admin/lib/store'
 
     interface Props {
-        params: { id: string };
+        params: { id: string }
     }
 
     let { params }: Props = $props()
@@ -27,7 +27,7 @@
 
     const initPromise = init()
 
-    async function init () {
+    async function init() {
         try {
             group = await api.getTargetGroup({ id: groupId })
             name = group.name
@@ -39,7 +39,7 @@
         }
     }
 
-    async function update () {
+    async function update() {
         if (!group) {
             return
         }
@@ -64,7 +64,7 @@
         }
     }
 
-    async function remove () {
+    async function remove() {
         if (!group || !confirm(`Delete target group "${group.name}"?`)) {
             return
         }
@@ -80,12 +80,11 @@
     }
 </script>
 
-
 {#if error}
     <Alert color="danger">{error}</Alert>
 {/if}
 <Loadable promise={initPromise}>
-{#if group}
+    {#if group}
     <div class="container-max-md">
         <div class="page-summary-bar">
             <div>
@@ -94,10 +93,12 @@
             </div>
         </div>
 
-        <form onsubmit={e => {
-            e.preventDefault()
-            update()
-        }}>
+        <form
+            onsubmit={(e) => {
+                e.preventDefault()
+                update()
+            }}
+        >
             <FormGroup>
                 <Label for="name">Name</Label>
                 <Input
@@ -126,18 +127,18 @@
                 <div class="color-picker">
                     {#each VALID_CHOICES as value (value)}
                         <button
-                            type="button"
-                            class="btn btn-secondary gap-2 d-flex align-items-center"
-                            class:active={color === value}
-                            disabled={saving}
-                            onclick={(e) => {
-                                e.preventDefault()
-                                color = value
-                            }}
-                            title={value || 'None'}
+                              type="button"
+                              class="btn btn-secondary gap-2 d-flex align-items-center"
+                              class:active={color === value}
+                              disabled={saving}
+                              onclick={(e) => {
+                                  e.preventDefault()
+                                  color = value
+                              }}
+                              title={value || 'None'}
                         >
-                            <GroupColorCircle color={value} />
-                            <span>{value || 'None'}</span>
+                              <GroupColorCircle color={value} />
+                              <span>{value || 'None'}</span>
                         </button>
                     {/each}
                 </div>
@@ -148,22 +149,24 @@
                     click={update}
                     color="primary"
                     disabled={!$adminPermissions.targetsEdit}
-                >Update</AsyncButton>
+                    >Update</AsyncButton
+                >
                 <Button
                     color="danger"
                     onclick={remove}
                     disabled={!$adminPermissions.targetsDelete}
-                >Remove</Button>
+                    >Remove</Button
+                >
             </div>
         </form>
     </div>
-{/if}
+    {/if}
 </Loadable>
 
 <style lang="scss">
     .color-picker {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
+    display: flex
+    flex-wrap: wrap
+    gap: 0.5rem
     }
 </style>

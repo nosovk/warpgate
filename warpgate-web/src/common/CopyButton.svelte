@@ -15,7 +15,7 @@
         children?: () => any
     }
 
-    // eslint-disable-next-line svelte/no-unused-props
+
     let {
         text,
         disabled = false,
@@ -29,7 +29,7 @@
     let successVisible = $state(false)
     let button: HTMLElement | undefined = $state()
 
-    async function _click () {
+    async function _click() {
         if (disabled) {
             return
         }
@@ -39,47 +39,44 @@
             successVisible = false
         }, 2000)
     }
-
 </script>
 
 {#if link}
     <!-- svelte-ignore a11y_invalid_attribute -->
     <a
-        href="#"
-        class={className}
-        class:disabled={disabled}
-        onclick={e => {
-            _click()
-            e.preventDefault()
-        }}
-        bind:this={button}
+    href="#"
+    class={className}
+    class:disabled
+    onclick={(e) => {
+        _click()
+        e.preventDefault()
+    }}
+    bind:this={button}
     >
-        {#if children}{@render children()}{:else}
-            {#if successVisible}
-                Copied
-            {:else}
-                Copy
-            {/if}
-        {/if}
+    {#if children}{@render children()}{:else if successVisible}
+        Copied
+    {:else}
+        Copy
+    {/if}
     </a>
 {:else}
     <Button
-        class={className}
-        bind:inner={button}
-        on:click={_click}
-        outline={outline}
-        color={color}
-        disabled={disabled}
+    class={className}
+    bind:inner={button}
+    on:click={_click}
+    {outline}
+    {color}
+    {disabled}
     >
-        {#if children}{@render children()}{:else}
-            {#if successVisible}
-                <Fa fw icon={faCheck} />
-            {:else}
-                <Fa fw icon={faCopy} />
-            {/if}
-            {#if label}
-                <span class="ms-2">{label}</span>
-            {/if}
+    {#if children}{@render children()}{:else}
+        {#if successVisible}
+            <Fa fw icon={faCheck} />
+        {:else}
+            <Fa fw icon={faCopy} />
         {/if}
+        {#if label}
+            <span class="ms-2">{label}</span>
+        {/if}
+    {/if}
     </Button>
 {/if}

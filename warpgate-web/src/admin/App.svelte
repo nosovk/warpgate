@@ -9,13 +9,13 @@
     import Brand from 'common/Brand.svelte'
     import Loadable from 'common/Loadable.svelte'
 
-    async function init () {
+    async function init() {
         await reloadServerInfo()
     }
 
     const initPromise = init()
 
-    const routes: Record<string, WrappedComponent> = {
+    const routes: Record<string, WrappedComponent> = $state({
         '/': wrap({
             asyncComponent: () => import('./Home.svelte') as any,
         }),
@@ -49,69 +49,68 @@
         '/config': wrap({
             asyncComponent: () => import('./config/Config.svelte') as any,
         }),
-    }
+    })
     routes['/config/*'] = routes['/config']!
 </script>
 
 <Loadable promise={initPromise}>
     <div class="app container-lg">
-        <header>
-            <a href="/@warpgate" class="d-flex logo-link me-4">
-                <Brand />
-            </a>
-            {#if $serverInfo?.username}
-                <a use:link use:active href="/">Sessions</a>
-                <a use:link use:active href="/config">Config</a>
-                <a use:link use:active href="/log">Log</a>
-            {/if}
-            <span class="ms-3"></span>
-            <div class="ms-auto">
-                <AuthBar />
-            </div>
-        </header>
-        <main>
-            <Router {routes}/>
-        </main>
+    <header>
+        <a href="/@warpgate" class="d-flex logo-link me-4">
+            <Brand />
+        </a>
+        {#if $serverInfo?.username}
+            <a use:link use:active href="/">Sessions</a>
+            <a use:link use:active href="/config">Config</a>
+            <a use:link use:active href="/log">Log</a>
+        {/if}
+        <span class="ms-3"></span>
+        <div class="ms-auto">
+            <AuthBar />
+        </div>
+    </header>
+    <main>
+        <Router {routes} />
+    </main>
 
-        <footer class="mt-5">
-            <span class="me-auto ms-3">
-                {$serverInfo?.version}
-            </span>
-            <ThemeSwitcher />
-        </footer>
+    <footer class="mt-5">
+        <span class="me-auto ms-3">
+            {$serverInfo?.version}
+        </span>
+        <ThemeSwitcher />
+    </footer>
     </div>
 </Loadable>
 
 <style lang="scss">
     @media (max-width: 767px) {
-        .logo-link {
-            display: none !important;
-        }
+    .logo-link {
+        display: none !important
+    }
     }
 
     .app {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
+    min-height: 100vh
+    display: flex
+    flex-direction: column
     }
 
     header, footer {
-        flex: none;
+    flex: none
     }
 
     main {
-        flex: 1 0 0;
+    flex: 1 0 0
     }
 
     header {
-        display: flex;
-        align-items: center;
-        padding: 7px 0;
-        margin: 10px 0 20px;
-
-        a {
-            font-size: 1.5rem;
-            margin-right: 15px;
-        }
+    display: flex
+    align-items: center
+    padding: 7px 0
+    margin: 10px 0 20px
+    a {
+        font-size: 1.5rem
+        margin-right: 15px
+    }
     }
 </style>

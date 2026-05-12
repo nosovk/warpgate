@@ -6,26 +6,25 @@
     import { Button } from '@sveltestrap/sveltestrap'
     import { adminPermissions } from 'admin/lib/store'
 
-    let error: string|undefined = $state()
-    let knownHosts: SSHKnownHost[]|undefined = $state()
-    let ownKeys: SSHKey[]|undefined = $state()
+    let error: string | undefined = $state()
+    let knownHosts: SSHKnownHost[] | undefined = $state()
+    let ownKeys: SSHKey[] | undefined = $state()
 
-    async function load () {
+    async function load() {
         ownKeys = await api.getSshOwnKeys()
         if ($adminPermissions.configEdit) {
             knownHosts = await api.getSshKnownHosts()
         }
     }
 
-    load().catch(async e => {
+    load().catch(async (e) => {
         error = await stringifyError(e)
     })
 
-    async function deleteHost (host: SSHKnownHost) {
+    async function deleteHost(host: SSHKnownHost) {
         await api.deleteSshKnownHost(host)
         load()
     }
-
 </script>
 
 <div class="page-summary-bar">
@@ -38,53 +37,58 @@
 
 {#if ownKeys}
     <h2>Warpgate's own SSH keys</h2>
-    <Alert color="info">Add these keys to the targets' <code>authorized_keys</code> files</Alert>
+    <Alert color="info"
+    >Add these keys to the targets' <code>authorized_keys</code> files</Alert
+    >
     <div class="list-group list-group-flush">
-        {#each ownKeys as key (key)}
-            <div class="list-group-item d-flex">
-                <pre>{key.kind} {key.publicKeyBase64}</pre>
-                <div class="ms-auto">
-                    <CopyButton class="ms-3 px-0" text={key.kind + ' ' + key.publicKeyBase64} />
-                </div>
+    {#each ownKeys as key (key)}
+        <div class="list-group-item d-flex">
+            <pre>{key.kind} {key.publicKeyBase64}</pre>
+            <div class="ms-auto">
+                <CopyButton
+                    class="ms-3 px-0"
+                    text={key.kind + ' ' + key.publicKeyBase64}
+                />
             </div>
-        {/each}
+        </div>
+    {/each}
     </div>
 {/if}
 
 <div class="mb-3"></div>
 {#if knownHosts}
-    {#if knownHosts.length }
-        <h2>Known hosts: {knownHosts.length}</h2>
+    {#if knownHosts.length}
+    <h2>Known hosts: {knownHosts.length}</h2>
     {:else}
-        <h2>No known hosts</h2>
+    <h2>No known hosts</h2>
     {/if}
     <div class="list-group list-group-flush">
-        {#each knownHosts as host (host.id)}
-            <div class="list-group-item">
-                <div class="d-flex">
-                    <strong>
-                        {host.host}:{host.port}
-                    </strong>
+    {#each knownHosts as host (host.id)}
+        <div class="list-group-item">
+            <div class="d-flex">
+                <strong>
+                    {host.host}:{host.port}
+                </strong>
 
-                    <Button
-                        class="ms-auto"
-                        color="link px-0"
-                        onclick={e => {
-                            e.preventDefault()
-                            deleteHost(host)
-                        }}
-                        disabled={!$adminPermissions.configEdit}
-                    >Delete</Button>
-                </div>
-                <pre>{host.keyType} {host.keyBase64}</pre>
+                <Button
+                    class="ms-auto"
+                    color="link px-0"
+                    onclick={(e) => {
+                        e.preventDefault()
+                        deleteHost(host)
+                    }}
+                    disabled={!$adminPermissions.configEdit}>Delete</Button
+                >
             </div>
-        {/each}
+            <pre>{host.keyType} {host.keyBase64}</pre>
+        </div>
+    {/each}
     </div>
 {/if}
 
 <style lang="scss">
     pre {
-        word-break: break-word;
-        white-space: normal;
+    word-break: break-word
+    white-space: normal
     }
 </style>

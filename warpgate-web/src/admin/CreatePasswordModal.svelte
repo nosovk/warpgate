@@ -14,15 +14,12 @@
         create: (password: string) => void
     }
 
-    let {
-        isOpen = $bindable(true),
-        create,
-    }: Props = $props()
+    let { isOpen = $bindable(true), create }: Props = $props()
     let password = $state('')
-    let field: HTMLInputElement|undefined = $state()
+    let field: HTMLInputElement | undefined = $state()
     let validated = $state(false)
 
-    function _save () {
+    function _save() {
         if (!password) {
             return
         }
@@ -31,39 +28,41 @@
         password = ''
     }
 
-    function _cancel () {
+    function _cancel() {
         isOpen = false
         password = ''
     }
 </script>
 
-<Modal toggle={_cancel} isOpen={isOpen} on:open={() => field?.focus()}>
-    <Form {validated} on:submit={e => {
+<Modal toggle={_cancel} {isOpen} on:open={() => field?.focus()}>
+    <Form
+    {validated}
+    on:submit={(e) => {
         _save()
         e.preventDefault()
-    }}>
-        <ModalBody>
-            <FormGroup floating label="Enter a new password" spacing="0">
-                <Input
-                    bind:inner={field}
-                    type="password"
-                    placeholder="New password"
-                    required
-                    bind:value={password} />
-            </FormGroup>
-        </ModalBody>
-        <ModalFooter>
-            <Button
-                class="modal-button"
-                color="primary"
-                on:click={() => validated = true}
-            >Create</Button>
+    }}
+    >
+    <ModalBody>
+        <FormGroup floating label="Enter a new password" spacing="0">
+            <Input
+                bind:inner={field}
+                type="password"
+                placeholder="New password"
+                required
+                bind:value={password}
+            />
+        </FormGroup>
+    </ModalBody>
+    <ModalFooter>
+        <Button
+            class="modal-button"
+            color="primary"
+            on:click={() => (validated = true)}>Create</Button
+        >
 
-            <Button
-                class="modal-button"
-                color="danger"
-                on:click={_cancel}
-            >Cancel</Button>
-        </ModalFooter>
+        <Button class="modal-button" color="danger" on:click={_cancel}
+            >Cancel</Button
+        >
+    </ModalFooter>
     </Form>
 </Modal>

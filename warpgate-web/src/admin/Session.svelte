@@ -1,5 +1,14 @@
 <script lang="ts">
-    import { api, type SessionSnapshot, type Recording, type TargetSSHOptions, type TargetHTTPOptions, type TargetMySqlOptions, type TargetPostgresOptions, type TargetKubernetesOptions } from 'admin/lib/api'
+    import {
+        api,
+        type SessionSnapshot,
+        type Recording,
+        type TargetSSHOptions,
+        type TargetHTTPOptions,
+        type TargetMySqlOptions,
+        type TargetPostgresOptions,
+        type TargetKubernetesOptions,
+    } from 'admin/lib/api'
     import { timeAgo } from 'admin/lib/time'
     import AsyncButton from 'common/AsyncButton.svelte'
     import DelayedSpinner from 'common/DelayedSpinner.svelte'
@@ -16,7 +25,10 @@
     import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
     import Tooltip from 'common/sveltestrap-s5-ports/Tooltip.svelte'
     import { PROTOCOL_PROPERTIES } from 'common/protocols'
-    import { recordingMetadataToFieldSet, recordingTypeLabel } from 'common/recordings'
+    import {
+        recordingMetadataToFieldSet,
+        recordingTypeLabel,
+    } from 'common/recordings'
 
     interface Props {
         params: { id: string }
@@ -24,20 +36,20 @@
 
     let { params = { id: '' } }: Props = $props()
 
-    let error: string|null = $state(null)
-    let session: SessionSnapshot|null = $state(null)
-    let recordings: Recording[]|null = $state(null)
+    let error: string | null = $state(null)
+    let session: SessionSnapshot | null = $state(null)
+    let recordings: Recording[] | null = $state(null)
 
-    async function load () {
+    async function load() {
         session = await api.getSession(params)
         recordings = await api.getSessionRecordings(params)
     }
 
-    async function close () {
+    async function close() {
         api.closeSession(session!)
     }
 
-    function getTargetDescription () {
+    function getTargetDescription() {
         if (session?.target) {
             let address = '<unknown>'
             if (session.target.options.kind === 'Ssh') {
@@ -53,11 +65,13 @@
                 address = `${options.host}:${options?.port}`
             }
             if (session.target.options.kind === 'Http') {
-                const options = session.target.options as unknown as TargetHTTPOptions
+                const options = session.target
+                    .options as unknown as TargetHTTPOptions
                 address = options.url
             }
             if (session.target.options.kind === 'Kubernetes') {
-                const options = session.target.options as unknown as TargetKubernetesOptions
+                const options = session.target
+                    .options as unknown as TargetKubernetesOptions
                 address = options.clusterUrl
             }
             return `${session.target.name} (${address})`
@@ -66,13 +80,12 @@
         }
     }
 
-    load().catch(async e => {
+    load().catch(async (e) => {
         error = await stringifyError(e)
     })
 
     const interval = setInterval(load, 1000)
     onDestroy(() => clearInterval(interval))
-
 </script>
 
 {#if !session && !error}
@@ -85,96 +98,113 @@
 
 {#if session}
     <div class="page-summary-bar">
-        <div>
-            <h1>session</h1>
-            <div class="d-flex align-items-center mt-1">
-                <Tooltip delay="250" target="usernameBadge" animation>Authenticated user</Tooltip>
-                <Tooltip delay="250" target="targetBadge" animation>Selected target</Tooltip>
+    <div>
+        <h1>session</h1>
+        <div class="d-flex align-items-center mt-1">
+            <Tooltip delay="250" target="usernameBadge" animation
+                >Authenticated user</Tooltip
+            >
+            <Tooltip delay="250" target="targetBadge" animation
+                >Selected target</Tooltip
+            >
 
-                <Badge id="usernameBadge" color="success" class="me-2 d-flex align-items-center">
-                    {#if session.username}
-                        <Fa icon={faUser} class="me-2" />
-                        {session.username}
-                    {:else}
-                        Logging in
-                    {/if}
-                </Badge>
-                {#if session.target}
-                    <Badge id="targetBadge" color="info" class="me-2 d-flex align-items-center">
-                        <Fa icon={faArrowRight} class="me-2" />
-                        {getTargetDescription()}
-                    </Badge>
+            <Badge
+                id="usernameBadge"
+                color="success"
+                class="me-2 d-flex align-items-center"
+            >
+                {#if session.username}
+                    <Fa icon={faUser} class="me-2" />
+                    {session.username}
+                {:else}
+                    Logging in
                 {/if}
-                <span class="text-muted">
-                    {#if session.ended}
-                        {formatDistance(new Date(session.started), new Date(session.ended))} long, <RelativeDate date={session.started} />
-                    {:else}
-                        {formatDistanceToNow(new Date(session.started))}
-                    {/if}
-                </span>
-            </div>
+            </Badge>
+            {#if session.target}
+                <Badge
+                    id="targetBadge"
+                    color="info"
+                    class="me-2 d-flex align-items-center"
+                >
+                    <Fa icon={faArrowRight} class="me-2" />
+                    {getTargetDescription()}
+                </Badge>
+            {/if}
+            <span class="text-muted">
+                {#if session.ended}
+                    {formatDistance(
+                        new Date(session.started),
+                        new Date(session.ended),
+                    )} long, <RelativeDate date={session.started} />
+                {:else}
+                    {formatDistanceToNow(new Date(session.started))}
+                {/if}
+            </span>
         </div>
-        {#if !session.ended && PROTOCOL_PROPERTIES[session.protocol]?.sessionsCanBeClosed}
-            <div class="ms-auto">
-                <AsyncButton color="warning" click={close}>
-                    Close now
-                </AsyncButton>
-            </div>
-        {/if}
+    </div>
+    {#if !session.ended && PROTOCOL_PROPERTIES[session.protocol]?.sessionsCanBeClosed}
+        <div class="ms-auto">
+            <AsyncButton color="warning" click={close}>
+                Close now
+            </AsyncButton>
+        </div>
+    {/if}
     </div>
 
-    {#if recordings?.length }
-        <h3 class="mt-4">Recordings</h3>
-        <div class="list-group list-group-flush">
-            {#each recordings as recording (recording.id)}
-                {@const metadata = JSON.parse(recording.metadata)}
-                <a
-                    class="list-group-item list-group-item-action"
-                    href="/recordings/{recording.id}"
-                    use:link>
-                    <div class="main gap-1">
-                        <strong>
-                            {recordingTypeLabel(recording)}
-                            {#if !metadata}
-                                : {recording.name}
-                            {/if}
-                        </strong>
-                        {#if metadata}
-                            {#each recordingMetadataToFieldSet(metadata) as item (item[0])}
-                                <div>
-                                    <span class="text-muted">{item[0]}:</span> {item[1]}
-                                </div>
-                            {/each}
+    {#if recordings?.length}
+    <h3 class="mt-4">Recordings</h3>
+    <div class="list-group list-group-flush">
+        {#each recordings as recording (recording.id)}
+            {@const metadata = JSON.parse(recording.metadata)}
+            <a
+                class="list-group-item list-group-item-action"
+                href="/recordings/{recording.id}"
+                use:link
+            >
+                <div class="main gap-1">
+                    <strong>
+                        {recordingTypeLabel(recording)}
+                        {#if !metadata}
+                              : {recording.name}
                         {/if}
-                        <small class="meta ms-auto">
-                            {timeAgo(recording.started)}
-                        </small>
-                    </div>
-                </a>
-            {/each}
-        </div>
+                    </strong>
+                    {#if metadata}
+                        {#each recordingMetadataToFieldSet(metadata) as item (item[0])}
+                              <div>
+                                  <span class="text-muted">{item[0]}:</span>
+                                  {item[1]}
+                              </div>
+                        {/each}
+                    {/if}
+                    <small class="meta ms-auto">
+                        {timeAgo(recording.started)}
+                    </small>
+                </div>
+            </a>
+        {/each}
+    </div>
     {/if}
 
     <h3 class="mt-4">Log</h3>
-    <LogViewer filters={{
+    <LogViewer
+    filters={{
         sessionId: session.id,
-    }} />
-
+    }}
+    />
 {/if}
 
 <style lang="scss">
 .list-group-item {
     .main {
-        display: flex;
-        align-items: center;
-
-        > * {
-            margin-right: 20px;
-        }
+    display: flex
+    align-items: center
+    > * {
+        margin-right: 20px
+    }
     }
 
     .meta {
-        opacity: .75;
+    opacity: .75
     }
 }
 </style>

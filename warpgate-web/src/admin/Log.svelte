@@ -1,37 +1,43 @@
 <script lang="ts">
-import LogViewer from './log-viewer/LogViewer.svelte'
-import { Input } from '@sveltestrap/sveltestrap'
-import { autosave } from 'common/autosave'
+    import LogViewer from './log-viewer/LogViewer.svelte'
+    import { Input } from '@sveltestrap/sveltestrap'
+    import { autosave } from 'common/autosave'
 
-interface Props {
-    params?: {
-        id?: string,
+    interface Props {
+        params?: {
+            id?: string
+        }
+        filterKind?: FilterKind
     }
-    filterKind?: FilterKind,
-}
 
-let { params, filterKind = undefined }: Props = $props()
+    let { params, filterKind = undefined }: Props = $props()
 
-let [target] = autosave<'all' | 'audit'>('log.target', 'all')
+    let [target] = autosave<'all' | 'audit'>('log.target', 'all')
 
-function toggleTarget () {
-    $target = $target === 'audit' ? 'all' : 'audit'
-}
+    function toggleTarget() {
+        $target = $target === 'audit' ? 'all' : 'audit'
+    }
 
-type FilterKind = 'user' | 'access-role' | 'admin-role'
+    type FilterKind = 'user' | 'access-role' | 'admin-role'
 
-
-let filters = $derived({
-    target: filterKind ? 'audit' : ($target === 'audit' ? 'audit' : undefined),
-    relatedUsers: filterKind === 'user' ? params?.id : undefined,
-    relatedAccessRoles: filterKind === 'access-role' ? params?.id : undefined,
-    relatedAdminRoles: filterKind === 'admin-role' ? params?.id : undefined,
-})
+    let filters = $derived({
+        target: filterKind
+            ? 'audit'
+            : $target === 'audit'
+                ? 'audit'
+                : undefined,
+        relatedUsers: filterKind === 'user' ? params?.id : undefined,
+        relatedAccessRoles:
+        filterKind === 'access-role' ? params?.id : undefined,
+        relatedAdminRoles: filterKind === 'admin-role' ? params?.id : undefined,
+    })
 </script>
 
 <div class="log-page">
-    <div class="page-summary-bar d-flex align-items-center justify-content-between">
-        <h1>
+    <div
+    class="page-summary-bar d-flex align-items-center justify-content-between"
+    >
+    <h1>
         {#if filterKind === 'user'}
             user audit log: UID <code>{params?.id}</code>
         {:else if filterKind === 'access-role'}
@@ -41,30 +47,30 @@ let filters = $derived({
         {:else}
             log
         {/if}
-        </h1>
-        <div class="d-flex align-items-center gap-3">
-            {#if !filterKind}
-                <Input
-                    type="switch"
-                    id="auditOnlyToggle"
-                    label="Audit log only"
-                    checked={$target === 'audit'}
-                    on:change={toggleTarget}
-                />
-            {/if}
-        </div>
+    </h1>
+    <div class="d-flex align-items-center gap-3">
+        {#if !filterKind}
+            <Input
+                type="switch"
+                id="auditOnlyToggle"
+                label="Audit log only"
+                checked={$target === 'audit'}
+                on:change={toggleTarget}
+            />
+        {/if}
+    </div>
     </div>
 
     {#key `${$target}-${filterKind}-${params?.id}`}
-        <LogViewer filters={filters} />
+    <LogViewer {filters} />
     {/key}
 </div>
 
 <style lang="scss">
     .log-page {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        min-height: 0;
+    display: flex
+    flex-direction: column
+    height: 100%
+    min-height: 0
     }
 </style>
